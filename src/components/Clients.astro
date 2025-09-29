@@ -1,0 +1,40 @@
+---
+import CardWithImage from './CardWithImage.astro';
+
+export interface Client {
+  id?: string;
+  imageSrc: string;
+  title: string;
+  description: string;
+  buttonLabel?: string;
+  buttonHref?: string;
+  buttonTarget?: string;
+}
+
+export interface Props {
+  clients: Client[];
+  // sectionTitle?: string;
+}
+
+const { clients} = Astro.props;
+---
+
+<section class="py-12 bg-gray-50 dark:bg-gray-900">
+  <div class="container mx-auto px-4">
+    <!-- <h2 class="text-3xl font-extrabold text-center text-gray-900 dark:text-white mb-10">{sectionTitle}</h2> -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {clients.map((client) => (
+        <CardWithImage
+          id={client.id}
+          imageSrc={client.imageSrc}
+          title={client.title}
+          description={client.description}
+          buttonLabel={client.buttonLabel}
+          buttonHref={client.buttonHref}
+          buttonTarget={client.buttonTarget}
+          className="h-full"
+        />
+      ))}
+    </div>
+  </div>
+</section>

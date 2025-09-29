@@ -1,0 +1,108 @@
+---
+import CopyrightNotice from './CopyrightNotice.astro';
+export interface Props {
+  logoSrc?: string; // Path to the logo image
+  description?: string; // Footer description text
+  quickLinks?: Array<{ label: string; href: string }>; // Quick links
+  resources?: Array<{ label: string; href: string }>; // Resource links
+  contactInfo?: {
+    address: string;
+    email: string;
+    phone: string;
+  }; // Contact information
+  socialLinks?: Array<{ icon: string; href: string }>; // Social media links
+  bgColor?: string; // Background color for the footer
+}
+
+const {
+  logoSrc = "/assets/logo.svg",
+  description = "Empowering learning through interactive virtual labs and curriculum-aligned activities.",
+  quickLinks = [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+    { label: "Pricing", href: "/pricing" },
+  ],
+  resources = [
+    { label: "Blog", href: "#" },
+    { label: "FAQs", href: "#" },
+    { label: "Support", href: "#" },
+    { label: "Terms of Service", href: "#" },
+  ],
+  contactInfo = {
+    address: "123 Learning Street, Education City, EC 12345",
+    email: "support@example.com",
+    phone: "+1 (555) 123-4567",
+  },
+  socialLinks = [
+    { icon: "facebook", href: "#" },
+    { icon: "twitter", href: "#" },
+    { icon: "instagram", href: "#" },
+  ],
+  bgColor = "bg-gray-200 dark:bg-gray-900", // Default background color
+} = Astro.props;
+---
+
+<footer class={`${bgColor} text-gray-600 dark:text-gray-400 py-8 w-full`}>
+  <!-- Top Section: Social Links -->
+  <div class="container mx-auto px-6 lg:px-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+    <!-- Column 1: Logo and Info -->
+    <div>
+      <img src={logoSrc} alt="Logo" class="h-12 mb-4" />
+      <p class="text-sm">{description}</p>
+    </div>
+
+    <!-- Column 2: Quick Links -->
+    <div>
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Quick Links</h3>
+      <ul class="space-y-2">
+        {quickLinks.map((link) => (
+          <li>
+            <a href={link.href} class="hover:underline">{link.label}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Column 3: Resources -->
+    <div>
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Resources</h3>
+      <ul class="space-y-2">
+        {resources.map((resource) => (
+          <li>
+            <a href={resource.href} class="hover:underline">{resource.label}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Column 4: Contact Info -->
+    <div>
+      <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Contact</h3>
+      <p class="text-sm">
+        {contactInfo.address}<br />
+        Email: <a href={`mailto:${contactInfo.email}`} class="hover:underline">{contactInfo.email}</a><br />
+        Phone: {contactInfo.phone}
+      </p>
+    </div>
+  </div>
+
+  <!-- Bottom Section: Four Column Grid -->
+  <div class="container mx-auto px-6 lg:px-20 flex flex-col md:flex-row md:justify-between items-center">
+    <div class="text-center md:text-left mb-4 md:mb-0">
+        <Fragment><CopyrightNotice /></Fragment>
+      <!-- <img src={logoSrc} alt="Logo" class="h-12 mb-4 mx-auto md:mx-0" />
+      <p class="text-sm">{description}</p> -->
+    </div>
+    <div class="flex justify-center md:justify-end space-x-4">
+      {socialLinks.map((link) => (
+        <a href={link.href} class="text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <use href={`/icons/${link.icon}.svg#icon`} />
+          </svg>
+        </a>
+      ))}
+    </div>
+  </div>
+  
+</footer>

@@ -1,0 +1,77 @@
+---
+export interface Props {
+  id?: string; // Optional id for the section
+  title?: string;
+  subtitle?: string;
+  buttonLabel?: string; // Label for the primary button
+  buttonHref?: string; // Link for the primary button
+  secondaryButtonLabel?: string; // Label for the secondary button
+  secondaryButtonHref?: string; // Link for the secondary button
+  animationSrc?: string; // URL or path to the Lottie animation JSON
+  bgColor?: string; // Background color for the section
+  className?: string; // Allow custom classes for styling
+  target?: string; // Optional target attribute
+  rel?: string; // Optional rel attribute
+}
+
+const {
+  id = "", // Default to an empty string if no id is provided
+  title = "Welcome to Our Platform",
+  subtitle = "Discover amazing features and start your journey with us.",
+  buttonLabel = "Get Started",
+  buttonHref = "/auth/signup",
+  secondaryButtonLabel = "Learn More",
+  secondaryButtonHref = "/learn-more",
+  animationSrc = "", // Replace with your Lottie animation path
+  bgColor = "bg-gray-100 dark:bg-gray-900", // Default background color
+  className = "",
+  target = "_self", // Default target
+  rel = "noopener noreferrer", // Default rel
+} = Astro.props;
+---
+
+<section id={id} class={`${bgColor} py-6 ${className}`}>
+  <div class="container mx-auto px-6 lg:px-20 flex flex-col lg:flex-row items-center">
+    <!-- Left Content -->
+    <div class="text-center lg:text-left lg:w-1/2">
+      <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+        {title}
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
+        {subtitle}
+      </p>
+      <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+        <a
+          href={buttonHref}
+          target={target}
+          rel={rel}
+          class="px-6 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md transition duration-300"
+        >
+          {buttonLabel}
+        </a>
+        {secondaryButtonHref && (
+          <a
+            href={secondaryButtonHref}
+            target={target}
+            rel={rel}
+            class="px-6 py-3 text-blue-600 bg-white border border-blue-600 hover:bg-blue-100 rounded-xl shadow-md transition duration-300 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-800"
+          >
+            {secondaryButtonLabel}
+          </a>
+        )}
+      </div>
+    </div>
+
+    <!-- Right Content: Lottie Animation -->
+    <div class="mt-10 lg:mt-0 lg:w-1/2 flex justify-center">
+      <dotlottie-player
+        src={animationSrc}
+        background="transparent"
+        speed="1"
+        style="width: 100%; max-width: 400px; height: auto;"
+        loop
+        autoplay
+      ></dotlottie-player>
+    </div>
+  </div>
+</section>

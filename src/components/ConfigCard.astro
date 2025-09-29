@@ -1,0 +1,56 @@
+---
+export interface Props {
+  title: string;
+  processor: string;
+  ram: string;
+  hardDisk: string;
+  wifi: string;
+  bluetooth: string;
+  lan: string;
+  highlight?: boolean;
+}
+
+const {
+  title,
+  processor,
+  ram,
+  hardDisk,
+  wifi,
+  bluetooth,
+  lan,
+  highlight = false,
+} = Astro.props;
+---
+
+<div class={`relative flex flex-col
+  bg-gradient-to-br from-white via-gray-50 to-primary-50
+  dark:from-gray-900 dark:via-gray-800 dark:to-primary-900
+  rounded-xl shadow-lg p-8 transition-transform duration-300 hover:scale-105 hover:shadow-2xl
+  ${highlight ? 'border-4 border-primary-500 dark:border-primary-400' : ''}`}>
+  {highlight && (
+    <span class="absolute top-4 right-4 bg-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow dark:bg-primary-400">
+      Most Popular
+    </span>
+  )}
+  <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">{title}</h3>
+  <ul class="space-y-3 text-gray-700 dark:text-gray-300">
+    <li>
+      <span class="font-semibold">Processor:</span> {processor}
+    </li>
+    <li>
+      <span class="font-semibold">RAM:</span> {ram}
+    </li>
+    <li>
+      <span class="font-semibold">Hard Disk:</span> {hardDisk}
+    </li>
+    <li>
+      <span class="font-semibold">WiFi:</span> {wifi}
+    </li>
+    <li>
+      <span class="font-semibold">Bluetooth:</span> {bluetooth}
+    </li>
+    <li>
+      <span class="font-semibold">LAN:</span> {lan}
+    </li>
+  </ul>
+</div>

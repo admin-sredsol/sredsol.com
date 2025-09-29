@@ -1,0 +1,267 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Numbers Between Square Numbers - GeoGebra API Example</title>
+    <link rel="stylesheet" href="css/mdb.min.css" />
+    <script src="https://ggb-cdn.sredsol.com/embed-ggb.js"></script>
+  </head>
+  <body>
+    <div class="container py-4">
+      <div class="mx-auto my-3" style="max-width: 800px">
+        <div
+          id="ggb-element"
+          class="w-100"
+          style="aspect-ratio: 2 / 1; min-height: 200px; background: #f8f9fa"
+        ></div>
+      </div>
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <div class="mb-4">
+            <label for="nSlider" class="form-label"
+              >n = <span id="nValue">2</span></label
+            >
+            <input
+              type="range"
+              class="form-range"
+              id="nSlider"
+              min="1"
+              max="10"
+              value="2"
+              aria-label="Choose n"
+            />
+          </div>
+          <button
+            id="toggleFormulaBtn"
+            class="btn btn-outline-primary btn-rounded mb-3"
+          >
+            Show/Hide Formula
+          </button>
+          <div id="formula" class="alert alert-success" style="display: none">
+            <b>General Formula:</b> The number of non-square numbers between
+            <span class="text-primary">n²</span> and
+            <span class="text-primary">(n+1)²</span> is <b>2n</b>.<br />
+            That is, between
+            <span class="text-primary">n²</span> and
+            <span class="text-primary">(n+1)²</span>:
+            <b>(n+1)² - n² - 1 = 2n</b>
+          </div>
+          <div id="numberList" class="mt-3 fs-5"></div>
+          <div id="explanation" class="mt-2 fs-6 text-secondary"></div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div id="quizSection" class="mt-4">
+            <label for="quizInput" class="form-label">
+              How many non-square numbers between n² and (n+1)²?
+            </label>
+            <input
+              type="number"
+              id="quizInput"
+              class="form-control d-inline-block w-auto rounded-pill"
+            />
+            <button id="quizBtn" class="btn btn-success btn-rounded ms-2">
+              Check
+            </button>
+            <span id="quizFeedback" class="ms-3"></span>
+          </div>
+          <div id="clickFeedback" class="mt-3 fs-6 text-info"></div>
+          <div class="mb-3">
+            <button
+              id="toggleGridBtn"
+              class="btn btn-secondary btn-rounded me-2"
+            >
+              Toggle Grid
+            </button>
+            <button id="toggleAxesBtn" class="btn btn-secondary btn-rounded">
+              Toggle Axes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Initialize GeoGebra applet
+      var params = {
+        id: "ggbApplet",
+        appName: "classic",
+        perspective: "G",
+        width: 800,
+        height: 250,
+        showToolBar: false,
+        showAlgebraInput: false,
+        showMenuBar: false,
+        bgColor: "black",
+        appletOnLoad: function (api) {
+          window.ggbApplet = api;
+          ggbApplet.setGridVisible(gridVisible);
+          ggbApplet.setAxesVisible(axesVisible, axesVisible);
+          ggbApplet.setGraphicsOptions(1, { bgColor: "#fff4e6" });
+          updateGeoGebra(2); // initial value
+          setupClientListener();
+        },
+      };
+      var applet = new GGBApplet(params, true);
+      applet.setHTML5Codebase("https://ggb-cdn.sredsol.com/web3d");
+      window.addEventListener("load", function () {
+        applet.inject("ggb-element");
+      });
+
+      // Track current visibility state for grid and axes
+      let gridVisible = false;
+      let axesVisible = false;
+
+      // Show/hide formula and handle grid/axes buttons
+      document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("toggleFormulaBtn").onclick = function () {
+          var formulaDiv = document.getElementById("formula");
+          formulaDiv.style.display =
+            formulaDiv.style.display === "none" ? "block" : "none";
+        };
+
+        document.getElementById("toggleGridBtn").onclick = function () {
+          gridVisible = !gridVisible;
+          if (window.ggbApplet) {
+            ggbApplet.setGridVisible(gridVisible);
+          }
+        };
+        document.getElementById("toggleAxesBtn").onclick = function () {
+          axesVisible = !axesVisible;
+          if (window.ggbApplet) {
+            ggbApplet.setAxesVisible(axesVisible, axesVisible);
+          }
+        };
+      });
+
+      // Quiz logic
+      document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("quizBtn").onclick = function () {
+          var n = parseInt(document.getElementById("nSlider").value, 10);
+          var answer = parseInt(document.getElementById("quizInput").value, 10);
+          var correct = 2 * n;
+          var feedback = document.getElementById("quizFeedback");
+          if (answer === correct) {
+            feedback.textContent = "✅ Correct!";
+            feedback.style.color = "green";
+          } else {
+            feedback.textContent = "❌ Try again!";
+            feedback.style.color = "red";
+          }
+        };
+      });
+
+      // Update function to display non-square numbers between n^2 and (n+1)^2
+      function updateGeoGebra(n) {
+        if (window.ggbApplet) {
+          ggbApplet.reset();
+          // Restore grid and axes visibility after reset
+          ggbApplet.setGridVisible(gridVisible);
+          ggbApplet.setAxesVisible(axesVisible, axesVisible);
+          ggbApplet.setGraphicsOptions(1, { bgColor: "#fff4e6" });
+
+          // Remove old points and texts
+          for (let k = 1; k <= 2 * (n + 1); k++) {
+            let pointName = `N${k}`;
+            if (ggbApplet.exists && ggbApplet.exists(pointName)) {
+              ggbApplet.deleteObject(pointName);
+            }
+          }
+          if (ggbApplet.exists && ggbApplet.exists("A"))
+            ggbApplet.deleteObject("A");
+          if (ggbApplet.exists && ggbApplet.exists("B"))
+            ggbApplet.deleteObject("B");
+          if (ggbApplet.exists && ggbApplet.exists("Text1"))
+            ggbApplet.deleteObject("Text1");
+          if (ggbApplet.exists && ggbApplet.exists("Text2"))
+            ggbApplet.deleteObject("Text2");
+          if (ggbApplet.exists && ggbApplet.exists("diffSeg"))
+            ggbApplet.deleteObject("diffSeg");
+          if (ggbApplet.exists && ggbApplet.exists("diffLabel"))
+            ggbApplet.deleteObject("diffLabel");
+
+          var a = n * n;
+          var b = (n + 1) * (n + 1);
+
+          // Plot squares (blue, square shape)
+          ggbApplet.evalCommand(`A = (${a}, 0)`);
+          ggbApplet.setColor("A", 0, 0, 255);
+          ggbApplet.setLabelVisible("A", true);
+          ggbApplet.setPointStyle && ggbApplet.setPointStyle("A", 1); // square
+          ggbApplet.evalCommand(`B = (${b}, 0)`);
+          ggbApplet.setColor("B", 0, 0, 255);
+          ggbApplet.setLabelVisible("B", true);
+          ggbApplet.setPointStyle && ggbApplet.setPointStyle("B", 1); // square
+
+          // Plot non-square numbers (red, circle shape)
+          for (let k = 1; k <= 2 * n; k++) {
+            let x = a + k;
+            let pointName = `N${k}`;
+            ggbApplet.evalCommand(`${pointName} = (${x}, 0)`);
+            ggbApplet.setColor(pointName, 255, 0, 0);
+            ggbApplet.setLabelVisible(pointName, true);
+            ggbApplet.setPointStyle && ggbApplet.setPointStyle(pointName, 0); // circle
+            ggbApplet.setTooltipMode && ggbApplet.setTooltipMode(pointName, 1); // show value
+          }
+
+          // Add dynamic text in GeoGebra
+          ggbApplet.evalCommand(
+            `Text1 = Text("There are " + ${2 * n} + " non-square numbers between " + ${a} + " and " + ${b}, (${a}, 1.5))`,
+          );
+          // Add visual difference segment and label
+          ggbApplet.evalCommand("diffSeg = Segment(A, B)");
+          ggbApplet.setColor("diffSeg", 0, 128, 0);
+          ggbApplet.evalCommand(
+            `diffLabel = Text("Difference = " + (${b} - ${a}) + " = 2n+1 = " + (2*${n}+1), (${(a + b) / 2}, 0.7))`,
+          );
+
+          // Display the list of non-square numbers in HTML
+          let nonSquares = Array.from({ length: 2 * n }, (_, k) => a + k + 1);
+          document.getElementById("numberList").textContent =
+            "Non-square numbers: " + nonSquares.join(", ");
+
+          // Show explanation in HTML
+          document.getElementById("explanation").textContent =
+            `For n = ${n}: n² = ${a}, (n+1)² = ${b}. There are 2n = ${2 * n} non-square numbers between them.`;
+
+          // Set the x-axis window to fit all points
+          let margin = Math.max(2, Math.floor((b - a) * 0.1)); // 10% margin or at least 2
+          ggbApplet.setCoordSystem(a - margin, b + margin, -2, 3);
+
+          // Clear click feedback
+          document.getElementById("clickFeedback").textContent = "";
+        }
+      }
+
+      // Slider event
+      document
+        .getElementById("nSlider")
+        .addEventListener("input", function (e) {
+          var n = parseInt(e.target.value, 10);
+          document.getElementById("nValue").textContent = n;
+          updateGeoGebra(n);
+        });
+
+      // Clickable points with feedback using GeoGebra API client listener
+      function setupClientListener() {
+        if (!window.ggbApplet) return;
+        window.ggbApplet.registerClientListener(function (event) {
+          if (event.type === "select") {
+            var objName = event.target;
+            if (!objName) return;
+            var n = parseInt(document.getElementById("nSlider").value, 10);
+            var a = n * n;
+            var b = (n + 1) * (n + 1);
+            let feedback = "";
+            if (objName === "A" || objName === "B") {
+              let val = objName === "A" ? a : b;
+              feedback = `You clicked <b>${val}</b>, which is a <span style="color:blue;">perfect square</span> (${objName === "A" ? "n²" : "(n+1)²"}).`;
+            } else if (/^N\d+$/.test(objName)) {
+              let idx = parseInt(objName.slice(1), 10);
+              let val = a + idx;
+              feedback = `You clicked <b>${val}</b>, which is <span style="color:red;">not a perfect square</span>.`;
+            }
+            document.getElementById("clickFeedback").innerHTML = feedback;
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

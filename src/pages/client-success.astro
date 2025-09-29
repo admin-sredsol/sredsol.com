@@ -1,0 +1,52 @@
+---
+import LayoutStacked from '../layouts/LayoutStacked.astro';
+import ClientStories from '../components/ClientStories.astro';
+---
+<LayoutStacked>
+    <ClientStories
+      stories={[
+        {
+          id: "gses",
+          clientName: "GoodShepherd School, Kurnool",
+          logoSrc: "/client-logos/mrmsvarni_logo.avif",
+          description: "Empowering students with hands-on science labs.",
+          carouselItems: [
+            { imageSrc: "/client-images/gses2024-1.jpg", caption: "Lab in Action", content: "Students exploring virtual labs." },
+            { imageSrc: "/client-images/gses2024-4.jpg", caption: "Teacher Training", content: "Our workshop for teachers." }
+          ]
+        },
+        {
+          id: "knr",
+          clientName: "KNR School, Kurnool",
+          logoSrc: "/client-logos/mrmsvarni_logo.avif",
+          description: "Empowering students with hands-on science labs.",
+          carouselItems: [
+            { imageSrc: "/client-images/knr2024-1.jpg", caption: "Lab in Action", content: "Students exploring virtual labs." },
+            { imageSrc: "/client-images/knr2024-2.jpg", caption: "Teacher Training", content: "Our workshop for teachers." },
+            { imageSrc: "/client-images/knr2024-3.jpg", caption: "Class 8 Students", content: "Students exploring virtual labs." }
+          ]
+        },
+        {
+          id: "pbv",
+          clientName: "Prathibha Vidyalayam, Vizag",
+          logoSrc: "/client-logos/pbv.png",
+          description: "Empowering students with hands-on science labs.",
+          carouselItems: [
+            { imageSrc: "/client-images/pbv2025-1.jpg", caption: "Lab in Action", content: "Students exploring virtual labs." },
+            { imageSrc: "/client-images/pbv2024-2.jpg", caption: "Teacher Training", content: "Our workshop for teachers." }
+          ]
+        },
+        {
+          id: "mrms",
+          clientName: "MRM School, Varni",
+          logoSrc: "/client-logos/mrmsvarni_logo.avif",
+          description: "Empowering students with hands-on science labs.",
+          carouselItems: [
+            { imageSrc: "/client-images/pbv2025-1.jpg", caption: "Lab in Action", content: "Students exploring virtual labs." },
+            { imageSrc: "/client-images/pbv2024-2.jpg", caption: "Teacher Training", content: "Our workshop for teachers." }
+          ]
+        },
+      ]}
+    />
+
+</LayoutStacked>

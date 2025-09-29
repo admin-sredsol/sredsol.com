@@ -1,0 +1,85 @@
+---
+import LayoutStacked from '../layouts/LayoutStacked.astro';
+import Hero from '../components/Hero.astro';
+import Clients from '../components/Clients.astro';
+---
+
+<LayoutStacked>
+    <Hero
+      id="hero-clients"
+      title="Our Esteemed Association"
+      subtitle="Trusted by leading organizations in education and technology"
+      buttonLabel="Sign Up Now"
+      buttonHref="/auth/signup"
+      secondaryButtonLabel="Learn More"
+      secondaryButtonHref="/about"
+      bgColor="bg-blue-50 dark:bg-blue-900"
+      animationSrc="/animations/handshake.lottie"
+    />
+
+    <Clients
+      clients={[
+        {
+          id: "client-pbv",
+          imageSrc: "/client-logos/pbv.png",
+          title: "Client One",
+          description: "Innovative solutions for modern education.",
+          buttonLabel: "Visit",
+          buttonHref: "https://prathibhavidyalayam.edu.in",
+          buttonTarget: "_blank"
+        },
+        {
+          id: "client-gsesk",
+          imageSrc: "/images/client2.png",
+          title: "Client Two",
+          description: "Empowering learners worldwide.",
+          buttonLabel: "Learn More",
+          buttonHref: "https://clienttwo.com"
+        },
+        {
+          id: "client-knrsk",
+          imageSrc: "/images/client3.png",
+          title: "Client Three",
+          description: "Transforming classrooms with technology.",
+          buttonLabel: "Explore",
+          buttonHref: "https://clientthree.com"
+        }
+      ]}
+    />
+
+    <Clients
+      clients={[
+        {
+          id: "client-pbv",
+          imageSrc: "/client-logos/pbv.png",
+          title: "Client One",
+          description: "Innovative solutions for modern education.",
+          buttonLabel: "Visit",
+          buttonHref: "https://prathibhavidyalayam.edu.in",
+          buttonTarget: "_blank"
+        },
+        {
+          id: "client-gsesk",
+          imageSrc: "/images/client2.png",
+          title: "Client Two",
+          description: "Empowering learners worldwide.",
+          buttonLabel: "Learn More",
+          buttonHref: "https://clienttwo.com"
+        },
+        {
+          id: "client-knrsk",
+          imageSrc: "/images/client3.png",
+          title: "Client Three",
+          description: "Transforming classrooms with technology.",
+          buttonLabel: "Explore",
+          buttonHref: "https://clientthree.com"
+        }
+      ]}
+    />
+</LayoutStacked>
+
+
+<script is:inline
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>

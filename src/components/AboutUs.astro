@@ -1,0 +1,114 @@
+---
+export interface Props {
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  className?: string;
+}
+
+const {
+  sectionTitle = "Join Hands with Us to transform Learning and Teaching",
+  sectionSubtitle = "",
+  className = "",
+} = Astro.props;
+---
+
+<section class={`py-16 bg-gray-50 dark:bg-gray-900 ${className}`}>
+  <div class="container mx-auto px-4 max-w-4xl">
+    <h2 class="font-heading text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-4">
+      {sectionTitle}
+    </h2>
+    <p class="text-lg text-gray-700 dark:text-gray-300 text-center mb-10">
+      {sectionSubtitle}
+    </p>
+
+    {/* Mission Block */}
+    <div class="bg-primary-50 dark:bg-primary-900 rounded-lg p-6 mb-8 text-center shadow">
+      <h3 class="text-2xl font-bold text-primary-700 dark:text-primary-300 mb-2">Our Mission</h3>
+      <p class="text-lg text-primary-800 dark:text-primary-200">
+        To empower every school with cutting-edge, accessible technology that transforms teaching and learning for the 21st century.
+      </p>
+    </div>
+
+    {/* For School Leaders */}
+    <div class="mb-8 text-center">
+      <h3 class="text-xl font-semibold text-primary-700 dark:text-primary-300 mb-2">For School Leaders</h3>
+      <p class="text-gray-700 dark:text-gray-300">
+        We understand your challenges—budget, infrastructure, teacher training, and student engagement. Our solutions are designed to be affordable, easy to implement, and impactful from day one.
+      </p>
+    </div>
+
+    {/* What We Do, Vision, Promise */}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-10">
+      <p class="text-xl text-primary-700 dark:text-primary-300 font-semibold text-center mb-6">
+        We are a passionate team of tech-savvy educators, innovators, and lifelong learners. Our mission is to empower schools by bringing the latest technologies and interactive learning experiences to every classroom.
+      </p>
+      <ul class="space-y-4 text-gray-700 dark:text-gray-300 text-base">
+        <li>
+          <span class="font-bold text-primary-600 dark:text-primary-400">🚀 Vision:</span>
+          To transform education by making advanced, simulation-based learning accessible to all schools—urban or rural, large or small.
+        </li>
+        <li>
+          <span class="font-bold text-primary-600 dark:text-primary-400">💡 What We Do:</span>
+          <ul class="list-disc ml-6 mt-2 space-y-2">
+            <li>Develop and deploy <span class="font-semibold">ILS-Server</span>—a compact, low-power pocket PC preloaded with interactive virtual labs and mapped to your curriculum.</li>
+            <li>Offer <span class="font-semibold">simulation-based activities</span> and projects that engage students and foster real understanding.</li>
+            <li>Provide <span class="font-semibold">hands-on workshops</span> for teachers and students, both on-campus and online, to maximize the impact of our technology.</li>
+            <li>Deliver <span class="font-semibold">easy-to-use dashboards</span> for teachers and admins to manage, monitor, and enhance learning outcomes.</li>
+            <li>Ensure <span class="font-semibold">campus-wide access</span> via WiFi or LAN, so learning never stops.</li>
+          </ul>
+        </li>
+        <li>
+          <span class="font-bold text-primary-600 dark:text-primary-400">🤝 Our Promise:</span>
+          We partner with schools to create a future-ready learning environment—supporting you every step of the way, from setup to ongoing training and support.
+        </li>
+      </ul>
+    </div>
+
+    {/* Benefit Callouts */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      <div class="flex items-center bg-primary-100 dark:bg-primary-800 rounded-lg p-4">
+        <span class="text-3xl mr-4">💻</span>
+        <span class="text-primary-900 dark:text-primary-100 font-semibold">Turnkey Technology: Ready to use, no IT headaches</span>
+      </div>
+      <div class="flex items-center bg-primary-100 dark:bg-primary-800 rounded-lg p-4">
+        <span class="text-3xl mr-4">🧑‍🏫</span>
+        <span class="text-primary-900 dark:text-primary-100 font-semibold">Teacher Empowerment: Training and ongoing support</span>
+      </div>
+      <div class="flex items-center bg-primary-100 dark:bg-primary-800 rounded-lg p-4">
+        <span class="text-3xl mr-4">📈</span>
+        <span class="text-primary-900 dark:text-primary-100 font-semibold">Measurable Impact: Real-time dashboards and reports</span>
+      </div>
+      <div class="flex items-center bg-primary-100 dark:bg-primary-800 rounded-lg p-4">
+        <span class="text-3xl mr-4">🌐</span>
+        <span class="text-primary-900 dark:text-primary-100 font-semibold">Campus-wide Access: Learning anywhere, anytime</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+      <div class="flex-1 text-center">
+        <h3 class="text-2xl font-bold text-primary-700 dark:text-primary-400 mb-2">Why Choose Us?</h3>
+        <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+          <li>✔️ Proven impact in schools across the region</li>
+          <li>✔️ 100% curriculum-aligned content</li>
+          <li>✔️ Dedicated support & training</li>
+          <li>✔️ Scalable, secure, and future-proof solutions</li>
+        </ul>
+      </div>
+      <div class="flex-1 flex items-center justify-center">
+        <img
+          src="/images/about-innovation.svg"
+          alt="Empowering Education Illustration"
+          class="w-full max-w-xs rounded-lg shadow-lg dark:border dark:border-gray-700"
+          loading="lazy"
+        />
+      </div>
+    </div>
+
+    {/* CTA */}
+    <div class="text-center mt-10">
+      <a href="/contact" class="inline-block px-8 py-3 text-lg font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-lg shadow-md transition duration-300 dark:bg-primary-500 dark:hover:bg-primary-600">
+        Partner With Us
+      </a>
+    </div>
+  </div>
+</section>

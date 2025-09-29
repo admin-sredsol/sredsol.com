@@ -1,0 +1,84 @@
+---
+import LayoutStacked from '../layouts/LayoutStacked.astro';
+import Hero from '../components/Hero.astro';
+import ILSServer from '../components/ILSServer.astro';
+import ConfigCard from '../components/ConfigCard.astro';
+import Activities from '../components/Activities.astro';
+import Trainings from '../components/Trainings.astro';
+---
+
+<LayoutStacked>
+    <Hero
+      id="hero-about"
+      title="Our Services"
+      subtitle="Interactive Learning Space - Activities, Projects, Create, Collaborate, Share and Learn"
+      buttonLabel="Presentation"
+      buttonHref="https://presentation.sredsol.com"
+      target="_blank"
+      secondaryButtonLabel="Trainings"
+      secondaryButtonHref="#trainings"
+      bgColor="bg-blue-50 dark:bg-blue-900"
+      animationSrc="/animations/hero-course.lottie"
+    />
+    <ILSServer />
+    <section>
+      <h2 class="font-heading text-3xl font-extrabold text-center mb-8 text-gray-900 dark:text-white">
+        Find the Perfect ILS Server for Your School
+      </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <ConfigCard
+        title="Basic"
+        processor="Intel N100"
+        ram="8GB"
+        hardDisk="256GB SSD"
+        wifi="802.11ac"
+        bluetooth="4.2"
+        lan="1 Gbps"
+      />
+      <ConfigCard
+        title="Medium"
+        processor="Intel N150"
+        ram="16GB"
+        hardDisk="512GB SSD"
+        wifi="802.11ax"
+        bluetooth="5.0"
+        lan="1 Gbps"
+        highlight={true}
+      />
+      <ConfigCard
+        title="Premium"
+        processor="Intel i5"
+        ram="32GB"
+        hardDisk="1024GB SSD"
+        wifi="802.11ax"
+        bluetooth="5.2"
+        lan="2.5 Gbps"
+      />
+    </div>
+    </section>
+
+    <Activities
+      sectionTitle="Try Simulation-Based Activities"
+      activities={[
+        {
+          title: "Virtual Chemistry Lab: Lewis Structure Builder",
+          description: "Explore the Lewis Structures of common organic compounds like Ethane etc. with this interactive simulation. Adjust the Atom Positions and add the bonds.",
+          iframeUrl: "/lewis-structure-builder/index.html"
+        },
+        {
+          title: "Virtual Maths Lab: Non Squares",
+          description: "Experiment with finding the non-square numbers between two consecutive numbers in this interactive physics simulation.",
+          iframeUrl: "/non-squares.html"
+        }
+      ]}
+    />
+
+    <Trainings id="trainings" />
+
+</LayoutStacked>
+
+
+<script is:inline
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>

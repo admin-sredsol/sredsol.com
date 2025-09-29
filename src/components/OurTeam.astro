@@ -1,0 +1,55 @@
+---
+import CardWithImage from './CardWithImage.astro';
+
+export interface TeamMember {
+  id?: string;
+  imageSrc: string;
+  name: string;
+  role: string;
+  bio: string;
+  buttonLabel?: string;
+  buttonHref?: string;
+  buttonTarget?: string;
+}
+
+export interface Props {
+  members: TeamMember[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  className?: string;
+}
+
+const {
+  members = [],
+  sectionTitle = "Meet the passionate people behind our mission.",
+  sectionSubtitle = "Empowering Eduction through Technology",
+  className = "",
+} = Astro.props;
+---
+
+<section class={`py-16 bg-gray-50 dark:bg-gray-900 ${className}`}>
+  <div class="container mx-auto px-4 max-w-7xl">
+    <h2 class="font-heading text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-4">
+      {sectionTitle}
+    </h2>
+    {sectionSubtitle && (
+      <p class="text-lg text-gray-600 dark:text-gray-300 text-center mb-12">{sectionSubtitle}</p>
+    )}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      {members.map((member) => (
+        <CardWithImage
+          id={member.id}
+          imageSrc={member.imageSrc}
+          title={member.name}
+          description={
+            `<span class="block font-semibold text-primary-700 dark:text-primary-300 mb-2">${member.role}</span>${member.bio}`
+          }
+          buttonLabel={member.buttonLabel}
+          buttonHref={member.buttonHref}
+          buttonTarget={member.buttonTarget}
+          className="h-full"
+        />
+      ))}
+    </div>
+  </div>
+</section>

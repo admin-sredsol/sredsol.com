@@ -1,11 +1,81 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import LayoutStacked from '../layouts/LayoutStacked.astro';
+import Hero from '../components/Hero.astro';
+import Features from '../components/Features.astro';
+import ClientLogos from '../components/ClientLogos.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Testimonials from '../components/Testimonials.astro';
+import CallToAction from '../components/CallToAction.astro';
+import Faq from '../components/Faq.astro';
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<LayoutStacked>
+    <Hero
+      id="hero-index"
+      title="Sreedharas Solutions"
+      subtitle="Empowering Education with Technology - Interactive Learning Space (ILS)- Activities, Projects,  Workshopss, Collaborate, Share and Learn"
+      buttonLabel="Sign Up Now"
+      buttonHref="/auth/signup"
+      secondaryButtonLabel="Learn More"
+      secondaryButtonHref="/about"
+      bgColor="bg-blue-50 dark:bg-blue-900"
+      animationSrc="/animations/hero-index.lottie"
+    />
+
+    <Features id="features" />
+
+    <ClientLogos
+      logos={[
+        { imageSrc: "/client-logos/mrmsvarni_logo.avif", href: "/client-success#mrms", alt: "MRMS, Varni" },
+        { imageSrc: "/client-logos/pbv.png", href: "/client-success#pbv", alt: "PBV, Vizag" },
+        { imageSrc: "/logos/school3.png", alt: "GSES, Kurnool" },
+        { imageSrc: "/logos/school4.png", alt: "KNRSchool" },
+        { imageSrc: "/logos/school4.png", alt: "Srilakshmi School" },
+        { imageSrc: "/logos/school4.png", alt: "Sarvepalli School" },
+      ]}
+      sectionTitle="Trusted by Leading Institutions"
+      sectionSubtitle="Schools and organizations across the region rely on our platform."
+    />
+
+    <HowItWorks />
+
+    <Testimonials
+      testimonials={[
+        {
+          quote: "This platform transformed our science classes! The virtual labs are engaging and easy to use.",
+          author: "Dr. Smith",
+          role: "Principal, Example School",
+          imageSrc: "https://ui-avatars.com/api/?name=Dr+Smith&background=0D8ABC&color=fff"
+        },
+        {
+          quote: "Our students love the interactive activities. It's made learning fun and collaborative.",
+          author: "Ms. Patel",
+          role: "Science Teacher",
+          imageSrc: "https://ui-avatars.com/api/?name=Ms+Patel&background=0D8ABC&color=fff"
+        },
+        {
+          quote: "Our students love the interactive activities. It's made learning fun and collaborative.",
+          author: "Ms. Patel",
+          role: "Math Teacher",
+          imageSrc: "https://ui-avatars.com/api/?name=Ms+Patel&background=0D8ABC&color=fff"
+        }
+      ]}
+      sectionTitle="What Educators Say"
+      sectionSubtitle="Hear from schools and teachers using our platform."
+    />
+
+    <Faq />
+    <CallToAction
+          id="cta-main"
+          title="Ready to Get Started?"
+          description="Join our platform today and unlock a world of interactive learning and collaboration."
+          buttonLabel="Get Started"
+          buttonHref="/contact"
+        />
+</LayoutStacked>
+
+
+<script is:inline
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>

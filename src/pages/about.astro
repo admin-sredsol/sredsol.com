@@ -1,0 +1,26 @@
+---
+import LayoutStacked from '../layouts/LayoutStacked.astro';
+import AboutUs from '../components/AboutUs.astro';
+import Hero from '../components/Hero.astro';
+---
+
+
+<LayoutStacked>
+  <Hero
+    id="about-hero"
+    title="About Us"
+    subtitle="We are a team of tech-savvy educators dedicated to transforming learning environments with innovative, accessible solutions."
+    buttonLabel="Partner With Us"
+    buttonHref="/contact"
+    secondaryButtonLabel="See Our Solutions"
+    secondaryButtonHref="/services"
+    animationSrc="/animations/AIRobotTech.lottie"
+    bgColor="bg-blue-50 dark:bg-blue-900"
+  />
+  <AboutUs />
+</LayoutStacked>
+
+<script is:inline
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>

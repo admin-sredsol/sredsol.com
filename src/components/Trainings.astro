@@ -1,0 +1,61 @@
+---
+export interface TrainingType {
+  title: string;
+  description: string;
+  icon?: string; // Optional SVG string or icon component
+}
+
+export interface Props {
+  id?: string;
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  trainings?: TrainingType[];
+  className?: string;
+}
+
+const {
+  id = "",
+  sectionTitle = "Teacher & Student Workshops",
+  sectionSubtitle = "Empowering educators and learners through hands-on training with the ILS-Server and interactive activities. We offer both on-campus and online sessions, tailored to your needs.",
+  trainings = [
+    {
+      title: "Teacher Workshops",
+      description: "Hands-on training for teachers to master the ILS-Server, manage activities, and integrate simulation-based learning into their curriculum. Available on-campus and online (on-demand or regular).",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary-600 dark:text-primary-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0 0H6m6 0h6" /></svg>`
+    },
+    {
+      title: "Student Workshops",
+      description: "Interactive sessions for students to explore virtual labs, collaborate on projects, and develop digital skills. Delivered on-campus or online to maximize accessibility.",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary-600 dark:text-primary-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M16 7a4 4 0 11-8 0 4 4 0 018 0zm6 13v-2a4 4 0 00-3-3.87M6 7a4 4 0 018 0" /></svg>`
+    },
+    {
+      title: "On-Campus & Online",
+      description: "Flexible delivery: choose on-campus for immersive, in-person learning, or online for convenience and accessibility. Both regular and on-demand sessions available.",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary-600 dark:text-primary-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 8v8m8-8h-8m8 0a8 8 0 11-16 0 8 8 0 0116 0z" /></svg>`
+    }
+  ],
+  className = "",
+} = Astro.props;
+---
+
+<section id={id} class={`py-16 bg-gray-50 dark:bg-gray-900 ${className}`}>
+  <div class="container mx-auto px-4 max-w-5xl">
+    <h2 class="font-heading text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-4">
+      {sectionTitle}
+    </h2>
+    {sectionSubtitle && (
+      <p class="text-lg text-gray-600 dark:text-gray-300 text-center mb-12">{sectionSubtitle}</p>
+    )}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+      {trainings.map((training) => (
+        <div class="flex flex-col items-center text-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
+          {training.icon && (
+            <div class="mb-6" set:html={training.icon}></div>
+          )}
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{training.title}</h3>
+          <p class="text-gray-600 dark:text-gray-300">{training.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

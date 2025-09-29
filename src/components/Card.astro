@@ -1,0 +1,53 @@
+---
+export interface Props {
+  id?: string; // Optional id for the card
+  imageSrc?: string; // Optional image for the card
+  title: string; // Title of the card
+  description: string; // Description text
+  buttonLabel?: string; // Optional button label
+  buttonHref?: string; // Optional button link
+  target?: string; // Optional target attribute
+  rel?: string; // Optional rel attribute
+  className?: string; // Allow custom classes for styling
+}
+
+const {
+  id = "",
+  imageSrc = "",
+  title,
+  description,
+  buttonLabel = "Learn More",
+  buttonHref = "#",
+  target = "_self",
+  rel = "noopener noreferrer",
+  className = "",
+} = Astro.props;
+---
+
+<div id={id} class={`bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden ${className}`}>
+  {imageSrc && (
+    <img
+      src={imageSrc}
+      alt={title}
+      class="w-full h-48 object-cover"
+    />
+  )}
+  <div class="p-6">
+    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+      {title}
+    </h3>
+    <p class="text-gray-600 dark:text-gray-300 mb-6">
+      {description}
+    </p>
+    {buttonHref && (
+      <a
+        href={buttonHref}
+        target={target}
+        rel={rel} 
+        class="inline-block px-6 py-2 text-white bg-primary-600 hover:bg-primary-700 rounded-lg shadow-md transition duration-300 dark:bg-primary-500 dark:hover:bg-primary-600"
+      >
+        {buttonLabel}
+      </a>
+    )}
+  </div>
+</div>

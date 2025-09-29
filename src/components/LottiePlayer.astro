@@ -1,0 +1,38 @@
+---
+// filepath: /src/components/LottiePlayer.astro
+export interface Props {
+  src: string; // Path to the Lottie animation JSON file
+  loop?: boolean; // Whether the animation should loop
+  autoplay?: boolean; // Whether the animation should autoplay
+  speed?: number; // Playback speed of the animation
+  className?: string; // Additional classes for styling
+}
+
+const {
+  src,
+  loop = true,
+  autoplay = true,
+  speed = 1,
+  className = "",
+} = Astro.props;
+---
+
+<div class={`flex justify-center items-center ${className}`}>
+  <dotlottie-player
+    src={src}
+    background="transparent"
+    speed={speed}
+    loop={loop}
+    autoplay={autoplay}
+    class="w-full max-w-md"
+  ></dotlottie-player>
+</div>
+
+<!-- Include Lottie Player CDN -->
+<!-- <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script> -->
+<script is:inline
+  
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+>
+</script>

@@ -1,0 +1,64 @@
+---
+const faqs = [
+  {
+    question: "What is simulation-based learning?",
+    answer:
+      "Simulation-based learning uses interactive, virtual environments to mimic real-world scenarios. In our platform, students can perform virtual lab activities that help them understand complex concepts through hands-on experience."
+  },
+  {
+    question: "How does your platform engage students?",
+    answer:
+      "We offer interactive activities and projects that encourage students to explore, experiment, and collaborate. Our virtual labs make learning fun and memorable."
+  },
+  {
+    question: "Is your platform suitable for all age groups?",
+    answer:
+      "Yes! Our activities are designed to be adaptable for various age groups and educational levels, from primary school to higher education."
+  },
+  {
+    question: "Do I need to install any software?",
+    answer:
+      "No installation is required. Our platform is web-based and works on any modern browser, making it easy for students and teachers to access from anywhere."
+  },
+  {
+    question: "How do you ensure accessibility and inclusivity?",
+    answer:
+      "We follow best practices in accessibility and design our activities to be inclusive for all learners, including those with special needs."
+  }
+];
+---
+
+<section class="py-12 bg-gray-50 dark:bg-gray-900">
+  <div class="container mx-auto px-4 max-w-3xl">
+    <h2 class="text-3xl font-extrabold text-center text-gray-900 dark:text-white mb-8">Frequently Asked Questions</h2>
+    <div id="faq-accordion" data-accordion="collapse" class="space-y-4">
+      {faqs.map((faq, idx) => (
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
+          <h3>
+            <button
+              type="button"
+              class="flex items-center justify-between w-full p-5 font-medium text-left text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-t-lg focus:ring-2 focus:ring-primary-500 transition"
+              data-accordion-target={`#faq-body-${idx}`}
+              aria-expanded={idx === 0 ? "true" : "false"}
+              aria-controls={`faq-body-${idx}`}
+              onclick={() => {
+                const body = document.getElementById(`faq-body-${idx}`);
+                if (body) {
+                  body.classList.toggle('hidden');
+                }
+              }}
+            >
+              <span>{faq.question}</span>
+              <svg data-accordion-icon class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+          </h3>
+          <div id={`faq-body-${idx}`} class={`p-5 bg-gray-50 dark:bg-gray-900 ${idx === 0 ? '' : 'hidden'}`}>
+            <p class="text-gray-700 dark:text-gray-300">{faq.answer}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

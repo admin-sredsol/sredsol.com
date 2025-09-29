@@ -1,0 +1,62 @@
+---
+export interface Step {
+  icon?: string; // Optional icon SVG as string or component
+  title: string;
+  description: string;
+}
+
+export interface Props {
+  steps?: Step[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  className?: string;
+}
+
+const {
+  steps = [
+    {
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary-600 dark:text-primary-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>`,
+      title: "Deploy ILS Server",
+      description: "Purchase and Deploy Our ILS Server in Your School. Connect it to Scool Network and Go.",
+    },
+    {
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary-600 dark:text-primary-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6" /></svg>`,
+      title: "Classroom Usage",
+      description: "Easily Access interactive, simulation-based virtual labs mapped to your curriculum from the Teacher Dashboard through IFP or Smart TV.",
+    },
+    {
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-primary-600 dark:text-primary-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`,
+      title: "Student Engagement",
+      description: "Students use either PC or Tablets to access the Assigned Activities. Monitor student engagement and performance with Worksheets.",
+    },
+  ],
+  sectionTitle = "How It Works",
+  sectionSubtitle = "Getting started with our platform is simple and effective. Here’s how you can empower your school with interactive learning:",
+  className = "",
+} = Astro.props;
+---
+
+<section class={`py-16 bg-gray-50 dark:bg-gray-900 ${className}`}>
+  <div class="container mx-auto px-4 max-w-6xl">
+    <h2 class="font-heading text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-4">
+      {sectionTitle}
+    </h2>
+    {sectionSubtitle && (
+      <p class="text-lg text-gray-600 dark:text-gray-300 text-center mb-12">{sectionSubtitle}</p>
+    )}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+      {steps.map((step, idx) => (
+        <div class="flex flex-col items-center text-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
+          {step.icon && (
+            <div class="mb-6" set:html={step.icon}></div>
+          )}
+          <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 font-bold mb-4 text-lg shadow">
+            {idx + 1}
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{step.title}</h3>
+          <p class="text-gray-600 dark:text-gray-300">{step.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

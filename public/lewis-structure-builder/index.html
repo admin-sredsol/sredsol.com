@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+	<meta charset="UTF-8">
+	<!--<link href="icons/favicon.png" rel="shortcut icon">-->
+	<meta name="format-detection" content="telephone=no" />
+	<meta name="msapplication-tap-highlight" content="no" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+
+	<title>Lewis Structures</title>
+
+	<!-- Styles for application and screens -->
+	<link rel="stylesheet" type="text/css" href="css/main.css" />
+
+	<!-- University web fonts -->
+	<link href="https://cdn.ncsu.edu/brand-assets/fonts/include.css" rel="stylesheet" type="text/css" />
+
+	<!-- 3rd-party scripts -->
+	<script type="text/javascript" src="js/greensock/gsap.js"></script>
+	<script type="text/javascript" src="js/greensock/Draggable.js"></script>
+	<script type="text/javascript" src="js/greensock/InertiaPlugin.js"></script>
+	<script type="text/javascript">
+		gsap.registerPlugin(Draggable, InertiaPlugin);
+		gsap.config({
+			nullTargetWarn:false
+		});
+	</script>
+	
+	<!-- Application scripts and resources -->
+	<script type="text/javascript" src="js/polyfills.js"></script>
+	<script type="text/javascript" src="js/Molecule.js"></script>
+	<script type="text/javascript" src="js/Atom.js"></script>
+	<script type="text/javascript" src="js/Electron.js"></script>
+	<script type="text/javascript" src="js/Bond.js"></script>
+	<script type="text/javascript" src="js/GameManifest.js"></script>
+	<script type="text/javascript" src="js/EFFECTS.js"></script>
+	<script type="text/javascript" src="js/UTIL.js"></script>
+	<script type="text/javascript" src="js/DOMHELPER.js"></script>
+	<script type="text/javascript" src="js/APPLICATION.js"></script>
+
+	<!-- External script - Web Font Loader -->
+	<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+	<!--<script type="text/javascript" src="js/webfont.js"></script>-->
+</head>
+<body>
+
+	<div id="background">
+		<svg version="1.1" id="svg-snapshot" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="-300 -300 600 600" xml:space="preserve" preserveAspectRatio="none"></svg>
+		<svg version="1.1" id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="-300 -300 600 600" xml:space="preserve" preserveAspectRatio="none">
+			<defs>
+				<!--<filter id="drop-shadow" x="-5%" y="-5%" width="110%" height="110%" filterUnits="userSpaceOnUse">-->
+				<filter id="drop-shadow" x="0" y="0" width="100%" height="100%" filterUnits="objectBoundingBox">
+					<feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
+					<feMerge>
+						<feMergeNode in="blur"/>
+						<feMergeNode in="SourceGraphic"/>
+					</feMerge>
+				</filter>
+				<filter id="outline">
+					<feMorphology id="outline-dilation" in="SourceAlpha" result="dilated" operator="dilate" radius="1"></feMorphology>
+					<feFlood flood-color="#000000" flood-opacity="0.5" result="flood-fill"></feFlood>
+					<feComposite in="flood-fill" in2="dilated" operator="in" result="outline"></feComposite>
+					<feMerge>
+						<feMergeNode in="outline" />
+						<feMergeNode in="SourceGraphic" />
+					</feMerge>
+				</filter>
+			</defs>
+		</svg>
+		<div id="header">
+			<h1 id="target-goal" class="no-select"></h1>
+			<h2 id="target-goal-name" class="no-select"></h2>
+		</div>
+		<svg version="1.1" id="footer-overlay" class="no-select" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 30 30" xml:space="preserve" preserveAspectRatio="none">
+			<defs>
+				<linearGradient id="footer-overlay-lingrad" x1="0" x2="0" y1="0" y2="1">
+					<stop stop-color="#19b394" stop-opacity="0" offset="0%"/>
+					<stop stop-color="#19b394" stop-opacity="0.4" offset="30%"/>
+					<stop stop-color="#19b394" stop-opacity="0.6" offset="100%"/>
+				</linearGradient>
+			</defs>
+			<rect fill="url(#footer-overlay-lingrad)" x="0" y="0" width="30" height="30" />
+		</svg>
+		<div id="mode-toggle" class="hitarea">
+			<span id="mode-toggle-label" class="control-label no-select group outline">position&nbsp;atoms</span>
+			<div id="toggle-positioning" class="mode-button">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<!--<path fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" d="M 32 2 a 30 30 0 1 1 0 60 a 30 30 0 1 1 0 -60z"/>
+					<circle fill="#ffffff" cx="32" cy="32" r="15" />-->
+
+					<circle fill="#ffffff" cx="32" cy="32" r="6"/>
+					<g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round">
+						<line x1="43" y1="32" x2="55" y2="32"/>
+						<line x1="51.6" y1="27.1" x2="55" y2="32"/>
+						<line x1="51.6" y1="36.9" x2="55" y2="32"/>
+						<line x1="21" y1="32" x2="9" y2="32"/>
+						<line x1="12.4" y1="36.9" x2="9" y2="32"/>
+						<line x1="12.4" y1="27.1" x2="9" y2="32"/>
+						<line x1="32" y1="21" x2="32" y2="9"/>
+						<line x1="27.1" y1="12.4" x2="32" y2="9"/>
+						<line x1="36.9" y1="12.4" x2="32" y2="9"/>
+						<line x1="32" y1="43" x2="32" y2="55"/>
+						<line x1="36.9" y1="51.6" x2="32" y2="55"/>
+						<line x1="27.1" y1="51.6" x2="32" y2="55"/>
+					</g>
+				</svg>
+			</div><div id="toggle-bonding" class="mode-button" style="opacity:0.5">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<!--<path fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" d="M 32 2 a 30 30 0 1 1 0 60 a 30 30 0 1 1 0 -60z"/>
+					<rect fill="#ffffff" x="17" y="17" width="30" height="30" />-->
+
+					<circle fill="#ffffff" cx="14" cy="14" r="6"/>
+					<circle fill="#ffffff" cx="50" cy="50" r="6"/>
+					<line fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" x1="22" y1="22" x2="42" y2="42"/>
+					<g fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+						<line x1="48" y1="32" x2="52" y2="32"/>
+						<line x1="32" y1="16" x2="32" y2="12"/>
+						<line x1="43.3" y1="20.7" x2="46.1" y2="17.9"/>
+						<line x1="16" y1="32" x2="12" y2="32"/>
+						<line x1="32" y1="48" x2="32" y2="52"/>
+						<line x1="20.7" y1="43.3" x2="17.9" y2="46.1"/>
+					</g>
+				</svg>
+			</div>
+		</div>
+		<div id="check-work" class="hitarea">
+			<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 30 30" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+				<circle cx="15" cy="15" r="14" stroke="#ffffff" stroke-width="2" fill="transparent" />
+				<path d="M 9 15.5 l 4 4 l 8 -8" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+			</svg>
+			<span class="control-label no-select bottom outline">check</span>
+		</div>
+		<div id="reset" class="hitarea">
+			<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+				<g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round">
+					<path d="M10.3,34.5c-1.4-11.9,7.2-22.6,19.1-24s22.6,7.2,24,19.1s-7.2,22.6-19.1,24c-6.6,0.8-13.1-1.5-17.8-6.2"/>
+					<path d="M3.5,24.5l6.8,10l9-8.3"/>
+				</g>
+			</svg>
+			<span class="control-label no-select bottom outline">reset</span>
+		</div>
+		<div id="zoom-controls">
+			<div id="zoom-in" class="zoom-button hitarea">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<path fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" d="M 32 2 a 30 30 0 1 1 0 60 a 30 30 0 1 1 0 -60z M 16 32 h 32 M 32 16 v 32"/>
+				</svg>
+			</div><div id="zoom-out" class="zoom-button hitarea">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<path fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" d="M 32 2 a 30 30 0 1 1 0 60 a 30 30 0 1 1 0 -60z M 16 32 h 32"/>
+				</svg>
+			</div><span id="mode-toggle-label" class="control-label no-select group outline" style="text-align:center; right:0;">zoom</span>
+		</div>
+		<div id="feedback-display" style="visibility:hidden; opacity:0; transform:translate(-50%, -50px);"></div>
+		<div id="recent-attempts-snapshot" class="no-select" style="display:block;"></div>
+		<div id="reset-overlay" class="overlay no-select" style="visibility:hidden; opacity:0;"></div>
+		<div id="reset-prompt" style="visibility:hidden; opacity:0;">
+			<p>Are you sure you want to restart this molecule?</p>
+			<div id="reset-choices" class="prompt-choices">
+				<div class="hitarea" id="reset-yes"><span class="no-select">Yes</span></div><div class="hitarea" id="reset-no"><span class="no-select">No</span></div>
+			</div>
+		</div>
+		<div id="molecule-correct-display-lone-pairs-title" class="molecule-correct-display-title" style="visibility:hidden;opacity:0">Remember to include the lone pairs!</div>
+		<div id="molecule-correct-display" style="visibility:hidden; opacity:0;">
+			<div id="molecule-correct-display-snapshot-title" class="molecule-correct-display-title">Correct!</div>
+			<div id="molecule-correct-display-snapshot"></div>
+			<div id="molecule-correct-display-representations-title" class="molecule-correct-display-title">Representations</div>
+			<div id="molecule-correct-display-representations"></div>
+			<div id="next-button" style="visibility:hidden; opacity:0;"><span class="no-select">next</span><svg x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+				<path fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" d="M 16 32 h 32 M 32 16 l 16 16 l -16 16"/>
+			</svg></div>
+		</div>
+		<div id="recent-attempts-button" class="hitarea" style="opacity:0.5;">
+			<span class="control-label no-select top-right">recent<br/>attempts</span>
+			<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+				<g style="fill:none; stroke:#ffffff; stroke-width:3; stroke-linecap:round;">
+					<rect x="16" y="16" width="32" height="32" />
+				</g>
+				<circle fill="#ffffff" stroke="none" r="3.5" cx="24" cy="35" />
+				<circle fill="#ffffff" stroke="none" r="3.5" cx="32" cy="27" />
+				<circle fill="#ffffff" stroke="none" r="3.5" cx="40" cy="35" />
+				<path fill="none" stroke="#ffffff" stroke-width="1.5" d="M 24 35 L 32 27 L 40 35" />
+				<path id="recent-attempts-button-triangle" fill="#ffffff" stroke="none" d="M 24 52 h 16 l -8 6z" />
+			</svg>
+		</div>
+		<div id="recent-attempts-list" style="display:none;"></div>
+		<div id="menu-overlay" class="overlay no-select" style="visibility:hidden; opacity:0;"></div>
+		<div id="menu" style="visibility:hidden; opacity:0; transform:translateX(-100%);">
+			<h1>MENU</h1>
+			<div id="menu-close-icon" class="hitarea">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<g style="fill:none; stroke:#ffffff; stroke-width:3; stroke-linecap:round;">
+						<path d="M 18 18 l 28 28" />
+						<path d="M 18 46 l 28 -28" />
+					</g>
+				</svg>
+			</div>
+			<div id="menu-header">
+				<span id="menu-help" class="hitarea">Help</span><span class="fade"> | </span><span id="menu-about" class="hitarea">Video Introduction</span>
+			</div>
+			<div id="menu-scroll">
+				<ul>
+					<!--<li>Tutorial (unavailable)</li>-->
+					<hr />
+					<li class="header">Training</li>
+					<hr />
+				</ul>
+			</div>
+		</div>
+		<div id="menu-open-icon" class="hitarea">
+			<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+				<g style="fill:none; stroke:#ffffff; stroke-width:3; stroke-linecap:round;">
+					<path d="M 16 22 h 32" />
+					<path d="M 16 32 h 32" />
+					<path d="M 16 42 h 32" />
+				</g>
+			</svg>
+			<span class="control-label no-select top-left">menu</span>
+			<div class="menu-reminder" style="visibility: hidden; opacity: 0;">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="-16 0 48 48" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+				<g style="fill:none; stroke:#ffffff; stroke-width:2; stroke-linecap:round;" filter="url(#outline)">
+					<path d="M 2 8 l 4 -4 l 4 4" />
+					<path d="M 6 6 q 0 20 20 20" />
+				</g>
+			</svg><span>Learn more and get help here!</span>
+			</div>
+		</div>
+		<div id="recent-attempt-display-overlay" class="overlay no-select" style="visibility:hidden; opacity:0;"></div>
+		<div id="recent-attempt-display" style="visibility:hidden; opacity:0;">
+			<div id="recent-attempt-display-snapshot"></div>
+			<div id="recent-attempt-display-message"></div>
+			<div id="recent-attempt-close-icon" class="hitarea">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<g style="fill:none; stroke:#ffffff; stroke-width:3; stroke-linecap:round;">
+						<path d="M 18 18 l 28 28" />
+						<path d="M 18 46 l 28 -28" />
+					</g>
+				</svg>
+			</div>
+		</div>
+		<div id="representation-display-overlay" class="overlay no-select" style="visibility:hidden; opacity:0;"></div>
+		<div id="representation-display" style="visibility:hidden; opacity:0;">
+			<img id="representation-display-img" src="" />
+			<div id="representation-close-icon" class="hitarea">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<g style="fill:none; stroke:#ffffff; stroke-width:3; stroke-linecap:round;">
+						<path d="M 18 18 l 28 28" />
+						<path d="M 18 46 l 28 -28" />
+					</g>
+				</svg>
+			</div>
+		</div>
+		<!--<div id="debug-scroller"></div>-->
+		<div id="about-screen-overlay" class="overlay no-select" style="visibility:hidden; opacity:0;"></div>
+		<div id="about-screen" style="visibility:hidden; opacity:0;">
+			<div id="about-screen-close-icon" class="hitarea">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<g style="fill:none; stroke:#ffffff; stroke-width:3; stroke-linecap:round;">
+						<path d="M 18 18 l 28 28" />
+						<path d="M 18 46 l 28 -28" />
+					</g>
+				</svg>
+			</div>
+			<h2 id="about-screen-title" class="no-select">About</h2>
+			<div id="about-screen-content">
+				<p>The Lewis Structure Builder is a web application designed to help guide learners in discovering the rules of assembling Lewis Structures for molecules.</p>
+				<p>If you'd like a quick refresher on Lewis Structures, watch this video:</p>
+				<iframe id="about-video" src="" frameborder="0" /></iframe>
+			</div>
+		</div>
+		<div id="help-screen-overlay" class="overlay no-select" style="visibility:hidden; opacity:0;"></div>
+		<div id="help-screen" style="visibility:hidden; opacity:0;">
+			<div id="help-screen-close-icon" class="hitarea">
+				<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" xml:space="preserve" preserveAspectRatio="xMidYMid meet">
+					<g style="fill:none; stroke:#ffffff; stroke-width:3; stroke-linecap:round;">
+						<path d="M 18 18 l 28 28" />
+						<path d="M 18 46 l 28 -28" />
+					</g>
+				</svg>
+			</div>
+			<h2 id="help-screen-title" class="no-select">Help</h2>
+			<div id="help-screen-content">
+				<p>This app is designed to help illustrate the basics of building Lewis Structures. Visit the menu at any time to change which molecule you're working on, or to get help.</p>
+				<img src="img/help/01-overview.png" style="display: block; text-align: center; max-width: 100%; height: auto; margin: 5px auto;" />
+				<p>Drag the game board around to find all of the atoms or zoom in/out to get a different view.</p>
+				<p>
+					<img src="img/help/02-drag.png" style="float: left; margin: 0 10px;" />
+					<span>Drag atoms into positions next to other atoms where they can be bonded to each other. Remember that some atoms can form multiple bonds with others, and some can form double- or triple-bonds!</span>
+				</p>
+				<br style="clear: both;" />
+				<p style="text-align: center;">Toggle between positioning and bonding atoms.</p>
+				<p style="text-align: center;">
+					<img src="img/help/03-toggle-position.png" style="display: inline-block; height: 75px; margin: 0 10px;" />
+					<img src="img/help/04-toggle-bond.png" style="display: inline-block; height: 75px; margin: 0 10px;" />
+				</p>
+				<p>
+					<img src="img/help/05-bond.png" style="float: right; margin: 0 10px;" />
+					<span>Drag lines between adjacent atoms to create bonds. Tap bonds to break them. Some atoms can form multiple bonds with their neighbors. If atoms are too far apart or need to be repositioned, try toggling back to positioning atoms.</span>
+				</p>
+				<br style="clear: both;" />
+				<p>When ready, check your work to complete the molecule or get feedback. Some molecules have atoms with lone pairs have an extra step that will require you to identify them!</p>
+				<p style="text-align: center;">
+					<img src="img/help/06-check.png" style="display: inline-block; height: 100px;" />
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- Javascript required notification -->
+	<noscript>
+		<div id="noscript">Hey there! JavaScript is required to view and use this application. Please turn this on in your browser's settings and reload the page!</div>
+	</noscript>
+
+	<!-- Initialize application -->
+	<script type="text/javascript">
+		// Asynchronously load various fonts
+		if(typeof WebFont != 'undefined') {
+			WebFont.load({
+				custom: {
+					families: ['UniversLight', 'UniversCondensed'],
+					urls: ['https://cdn.ncsu.edu/brand-assets/fonts/include.css']
+				}, 
+				loading: function() {
+					console.log('WebFont loading');
+				}, 
+				active: function() {
+					console.log('WebFont active');
+				}, 
+				inactive: function() {
+					console.log('WebFont inactive');
+				}, 
+				fontloading: function(familyName, fvd) {
+					console.log('WebFont fontloading (' + familyName + ', ' + fvd + ')');
+				}, 
+				fontactive: function(familyName, fvd) {
+					console.log('WebFont fontactive (' + familyName + ', ' + fvd + ')');
+				}, 
+				fontinactive: function(familyName, fvd) {
+					console.log('WebFont fontinactive (' + familyName + ', ' + fvd + ')');
+				}
+			});
+		}
+		
+
+		// Kick off application
+		APPLICATION.init();
+	</script>
+</body>
+</html>

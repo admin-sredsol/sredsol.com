@@ -1,0 +1,9 @@
+---
+export interface Props {
+  className?: string;
+}
+const { className = "w-8 h-8" } = Astro.props;
+---
+<svg xmlns="http://www.w3.org/2000/svg" class={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" role="img">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.53 16.11a6 6 0 016.94 0M5.07 13.07a10 10 0 0113.86 0M1.64 9.64a16 16 0 0120.72 0M12 20h.01" />
+</svg>

@@ -1,0 +1,57 @@
+---
+export interface Testimonial {
+  id?: string;
+  quote: string;
+  author: string;
+  role?: string;
+  imageSrc?: string;
+}
+
+export interface Props {
+  testimonials: Testimonial[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  className?: string;
+}
+
+const {
+  testimonials = [],
+  sectionTitle = "What Educators Say",
+  sectionSubtitle = "",
+  className = "",
+} = Astro.props;
+---
+
+<section class={`py-16 bg-gray-50 dark:bg-gray-900 ${className}`}>
+  <div class="container mx-auto px-4 max-w-6xl">
+    <h2 class="font-heading text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-4">
+      {sectionTitle}
+    </h2>
+    {sectionSubtitle && (
+      <p class="text-lg text-gray-600 dark:text-gray-300 text-center mb-12">{sectionSubtitle}</p>
+    )}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+      {testimonials.map((t) => (
+        <div class="flex flex-col items-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
+          {t.imageSrc && (
+            <img
+              src={t.imageSrc}
+              alt={t.author}
+              class="w-16 h-16 rounded-full mb-4 object-cover border-2 border-primary-500 dark:border-primary-400"
+              loading="lazy"
+            />
+          )}
+          <blockquote class="italic text-lg text-gray-700 dark:text-gray-200 text-center mb-4">
+            “{t.quote}”
+          </blockquote>
+          <div class="text-primary-700 dark:text-primary-300 font-semibold text-center">
+            {t.author}
+            {t.role && (
+              <span class="block text-sm text-gray-500 dark:text-gray-400 font-normal">{t.role}</span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

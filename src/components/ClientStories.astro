@@ -1,0 +1,71 @@
+---
+import Carousel from './Carousel.astro';
+
+export interface ClientStory {
+  id?: string;
+  clientName: string;
+  logoSrc?: string;
+  carouselItems: {
+    imageSrc: string;
+    alt?: string;
+    caption?: string;
+    content?: string;
+  }[];
+  description?: string;
+  className?: string;
+}
+
+export interface Props {
+  stories: ClientStory[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  className?: string;
+}
+
+const {
+  stories = [],
+  sectionTitle = "Client Stories",
+  sectionSubtitle = "See how schools and organizations are transforming learning with our solutions.",
+  className = "",
+} = Astro.props;
+---
+
+<section class={`py-6 bg-gray-50 dark:bg-gray-900 ${className}`}>
+  <div class="container mx-auto px-4 max-w-6xl">
+    <h2 class="font-heading text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-4">
+      {sectionTitle}
+    </h2>
+    {sectionSubtitle && (
+      <p class="text-lg text-gray-600 dark:text-gray-300 text-center mb-12">{sectionSubtitle}</p>
+    )}
+    <div class="space-y-8">
+      {stories.map((story, idx) => (
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col md:flex-row items-center gap-4">
+          {/* Left: Client Info */}
+          <div class="w-full md:w-1/4 flex flex-col items-center md:items-start text-center md:text-left">
+            {story.logoSrc && (
+              <img
+                src={story.logoSrc}
+                alt={`${story.clientName} logo`}
+                class="h-14 w-auto mb-2 object-contain rounded"
+                loading="lazy"
+              />
+            )}
+            <h3 class="text-xl font-bold text-primary-700 dark:text-primary-400 mb-1">{story.clientName}</h3>
+            {story.description && (
+              <p class="text-gray-700 dark:text-gray-300 mb-2">{story.description}</p>
+            )}
+          </div>
+          {/* Right: Carousel */}
+          <div class="w-full md:w-3/4">
+            <Carousel
+              id={`client-story-carousel-${story.id || idx}`}
+              items={story.carouselItems}
+              className="bg-transparent h-[22rem]"
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

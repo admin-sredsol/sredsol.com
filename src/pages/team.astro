@@ -1,0 +1,57 @@
+---
+import LayoutStacked from '../layouts/LayoutStacked.astro';
+import Hero from '../components/Hero.astro';
+import OurTeam from '../components/OurTeam.astro';
+---
+
+<LayoutStacked>
+    <Hero
+      id="hero-team"
+      title="Our Team"
+      subtitle="Interactive Activities, Projects - Create, Collaborate, Share and Learn"
+      buttonLabel="Sign Up Now"
+      buttonHref="/auth/signup"
+      secondaryButtonLabel="Learn More"
+      secondaryButtonHref="/about"
+      bgColor="bg-blue-50 dark:bg-blue-900"
+      animationSrc="/animations/Business-team.lottie"
+    />
+
+    <OurTeam
+      members={[
+        {
+          imageSrc: "https://ui-avatars.com/api/?name=Alex+Johnson&background=0D8ABC&color=fff",
+          name: "Haranatha Sarma Sreedhara",
+          role: "Head of Sredsol",
+          bio: "Haranatha Sarma is passionate about building scalable education platforms and leads our entire team with a focus on innovation and quality.",
+          buttonLabel: "LinkedIn",
+          buttonHref: "https://www.linkedin.com/in/sridhara-haranathasarma/",
+          buttonTarget: "_blank"
+        },
+        {
+          imageSrc: "https://ui-avatars.com/api/?name=Samira+Patel&background=0D8ABC&color=fff",
+          name: "Samira Patel",
+          role: "Curriculum Specialist",
+          bio: "Samira ensures our virtual labs and activities are mapped to the latest educational standards and are engaging for all learners.",
+          buttonLabel: "LinkedIn",
+          buttonHref: "#",
+          //buttonTarget: "_blank"
+        },
+        {
+          imageSrc: "https://ui-avatars.com/api/?name=Lee+Chen&background=0D8ABC&color=fff",
+          name: "Lee Chen",
+          role: "Product Manager",
+          bio: "Lee bridges the gap between technology and education, making sure our solutions truly empower teachers and students.",
+          buttonLabel: "LinkedIn",
+          buttonHref: "#",
+          //buttonTarget: "_blank"
+        }
+      ]}
+    />
+</LayoutStacked>
+
+
+<script is:inline
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>

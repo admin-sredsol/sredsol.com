@@ -1,0 +1,103 @@
+---
+export interface Feature {
+  title: string;
+  description: string;
+  icon: string; // icon name, e.g., "lock-closed"
+}
+
+export interface Props {
+  id?: string;
+  features?: Feature[];
+  className?: string;
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+}
+
+import LockClosedIcon from './icons/LockClosedIcon.astro';
+import DeviceMobileIcon from './icons/DeviceMobileIcon.astro';
+import AdjustmentsIcon from './icons/AdjustmentsIcon.astro';
+import BeakerIcon from './icons/BeakerIcon.astro';
+import WifiIcon from './icons/WifiIcon.astro';
+import UserGroupIcon from './icons/UserGroupIcon.astro';
+
+const {
+  id = "",
+  features = [
+    {
+      title: "Secure Offline Access",
+      description: "With Locally deployed Server Your data is safe and secure as it stays always within the Campus.",
+      icon: "lock-closed",
+    },
+    {
+      title: "User-Friendly Design",
+      description: "Enjoy a seamless and intuitive user experience across all devices.",
+      icon: "device-mobile",
+    },
+    {
+      title: "Customizable",
+      description: "Easily adapt the platform to your specific needs and branding.",
+      icon: "adjustments",
+    },
+    {
+      title: "Virtual Labs",
+      description: "Experience hands-on learning with interactive, simulation-based virtual labs mapped to your curriculum.",
+      icon: "beaker",
+    },
+    {
+      title: "Campus-wide Connectivity",
+      description: "Access learning materials from anywhere on campus via fast and reliable WiFi or LAN.",
+      icon: "wifi",
+    },
+    {
+      title: "Collaborative Learning",
+      description: "Empower group work and peer-to-peer learning with features designed for classroom collaboration.",
+      icon: "user-group",
+    },
+  ],
+  className = "",
+  sectionTitle = "Features of Interactive Learning Space",
+  sectionSubtitle = "Brought to You by Sredsol",
+} = Astro.props;
+
+const iconComponents: { [key: string]: any } = {
+  "lock-closed": LockClosedIcon,
+  "device-mobile": DeviceMobileIcon,
+  "adjustments": AdjustmentsIcon,
+  "beaker": BeakerIcon,
+  "wifi": WifiIcon,
+  "user-group": UserGroupIcon,
+};
+---
+
+<section id={id} class={`bg-gray-100 dark:bg-gray-900 py-16 ${className}`}>
+  <div class="container mx-auto px-6 lg:px-20">
+    <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white text-center mb-4">
+      {sectionTitle}
+    </h2>
+    {sectionSubtitle && (
+      <p class="text-lg text-gray-600 dark:text-gray-300 text-center mb-12">{sectionSubtitle}</p>
+    )}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      {features.map((feature) => (
+        <div
+          class="flex flex-col items-center text-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
+        >
+          <div
+            class="flex items-center justify-center w-20 h-20 mb-6 text-primary-600 bg-gradient-to-tr from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 rounded-full shadow"
+            aria-label={feature.title + ' icon'}
+            role="img"
+          >
+            {(() => {
+              const Icon = iconComponents[feature.icon] || LockClosedIcon;
+              return <Icon class="w-8 h-8" />;
+            })()}
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {feature.title}
+          </h3>
+          <p class="text-gray-500 dark:text-gray-300 text-base">{feature.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

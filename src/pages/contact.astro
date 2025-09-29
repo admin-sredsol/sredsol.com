@@ -1,0 +1,32 @@
+---
+import LayoutStacked from '../layouts/LayoutStacked.astro';
+// import Hero from '../components/Hero.astro';
+import ContactUs from '../components/ContactUs.astro';
+---
+
+<LayoutStacked>
+    <!-- <Hero
+      id="hero-contact"
+      title="Contact Us"
+      subtitle="Interactive Activities, Projects - Create, Collaborate, Share and Learn"
+      buttonLabel="Sign Up Now"
+      buttonHref="/auth/signup"
+      secondaryButtonLabel="Learn More"
+      secondaryButtonHref="/about"
+      bgColor="bg-blue-50 dark:bg-blue-900"
+      animationSrc="/animations/login-animation.lottie"
+    /> -->
+
+    <ContactUs
+      id="contact"
+      title="Contact Us"
+      description="Have questions? We'd love to hear from you. Fill out the form below or reach out to us directly."
+      className="custom-contact-section"
+    />
+</LayoutStacked>
+
+
+<script is:inline
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>

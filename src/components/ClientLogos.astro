@@ -1,0 +1,54 @@
+---
+export interface ClientLogo {
+  imageSrc: string;
+  alt: string;
+  href?: string;
+  className?: string;
+}
+
+export interface Props {
+  logos: ClientLogo[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  className?: string;
+}
+
+const {
+  logos = [],
+  sectionTitle = "Trusted by Leading Institutions",
+  sectionSubtitle = "",
+  className = "",
+} = Astro.props;
+---
+
+<section class={`py-12 bg-gray-50 dark:bg-gray-900 ${className}`}>
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-extrabold text-center text-gray-900 dark:text-white mb-4 font-heading">
+      {sectionTitle}
+    </h2>
+    {sectionSubtitle && (
+      <p class="text-lg text-gray-600 dark:text-gray-300 text-center mb-10">{sectionSubtitle}</p>
+    )}
+    <div class="flex flex-wrap justify-center items-center gap-8">
+      {logos.map((logo) => (
+        logo.href ? (
+          <a href={logo.href} target="_blank" rel="noopener noreferrer">
+            <img
+              src={logo.imageSrc}
+              alt={logo.alt}
+              class={`h-14 w-auto object-contain grayscale hover:grayscale-0 transition duration-300 ${logo.className || ""}`}
+              loading="lazy"
+            />
+          </a>
+        ) : (
+          <img
+            src={logo.imageSrc}
+            alt={logo.alt}
+            class={`h-14 w-auto object-contain grayscale hover:grayscale-0 transition duration-300 ${logo.className || ""}`}
+            loading="lazy"
+          />
+        )
+      ))}
+    </div>
+  </div>
+</section>
