@@ -47,7 +47,7 @@ import ColorModeSwitcher from '../components/ColorModeSwitcher.astro';
 							<a
 								href={url("team")}
 								class="text-sm font-medium text-gray-700 hover:text-primary-700 dark:text-gray-400 dark:hover:text-primary-500"
-								aria-current="page">Team</a
+								aria-current="page">Our Team</a
 							>
 						</li>
 						<li>
@@ -133,28 +133,42 @@ import ColorModeSwitcher from '../components/ColorModeSwitcher.astro';
 				<a
 					href="#"
 					class="block py-2 pl-3 pr-4 text-base font-normal text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white"
-					>Dashboard</a
+					>Home</a
 				>
 			</li>
 			<li>
 				<a
-					href="#"
-					class="block px-3 py-2 text-base font-normal text-gray-600 border-b border-gray-100 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 dark:border-gray-700 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white"
-					>Team</a
+					href={url("about")}
+					class="block py-2 pl-3 pr-4 text-base font-normal text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white"
+					>About Us</a
 				>
 			</li>
 			<li>
 				<a
-					href="#"
-					class="block px-3 py-2 text-base font-normal text-gray-600 border-b border-gray-100 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 dark:border-gray-700 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white"
-					>Projects</a
+					href={url("services")}
+					class="block py-2 pl-3 pr-4 text-base font-normal text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white"
+					>Our Services</a
 				>
 			</li>
 			<li>
 				<a
-					href="#"
+					href={url("team")}
 					class="block px-3 py-2 text-base font-normal text-gray-600 border-b border-gray-100 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 dark:border-gray-700 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white"
-					>Calendar
+					>Our Team</a
+				>
+			</li>
+			<li>
+				<a
+					href={url("client-success")}
+					class="block px-3 py-2 text-base font-normal text-gray-600 border-b border-gray-100 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 dark:border-gray-700 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white"
+					>Client Stories</a
+				>
+			</li>
+			<li>
+				<a
+					href={url("contact")}
+					class="block px-3 py-2 text-base font-normal text-gray-600 border-b border-gray-100 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 dark:border-gray-700 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-white"
+					>Contact
 				</a>
 			</li>
 			<li class="block">

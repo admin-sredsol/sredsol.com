@@ -1,0 +1,828 @@
+cone-cylinder
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cone vs Cylinder Volume Visualization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Three.js and GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: #181c20;
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: #f0f0f0;
+        overflow: hidden;
+      }
+      .main-container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: stretch;
+      }
+      .header {
+        padding: 10px 24px;
+        font-size: 1.5rem;
+        background: rgba(24, 28, 32, 0.85);
+        border-bottom: 1px solid #222;
+        letter-spacing: 1px;
+        text-align: left;
+        min-height: 48px;
+        z-index: 2;
+      }
+      .three-panel {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #181c20;
+        overflow: hidden;
+        z-index: 1;
+      }
+      #three-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: #181c20;
+      }
+      .ui-panel {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        min-width: 220px;
+        background: rgba(24, 28, 32, 0.85);
+        border-radius: 10px;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+        padding: 18px 16px 12px 16px;
+        font-size: 1rem;
+        z-index: 10;
+        transition:
+          opacity 0.3s,
+          max-height 0.3s;
+        opacity: 0.95;
+        max-height: 600px;
+        overflow: hidden;
+      }
+      .ui-panel.collapsed {
+        max-height: 44px;
+        opacity: 0.7;
+        padding-bottom: 0;
+      }
+      .ui-panel h2 {
+        margin: 0 0 8px 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #e0e0e0;
+      }
+      .ui-panel .volumes {
+        margin: 10px 0 8px 0;
+        font-size: 0.98rem;
+        color: #b8eaff;
+      }
+      .ui-panel .ratio {
+        margin: 8px 0 0 0;
+        font-size: 0.97rem;
+        color: #ffd580;
+      }
+      .ui-panel .controls {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+      }
+      .dimension-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .dimension-controls label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95em;
+      }
+      .dimension-controls input[type="range"] {
+        flex: 1;
+      }
+      .ui-panel button {
+        background: #2e8bff;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 7px 16px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.2s;
+        outline: none;
+      }
+      .ui-panel button:active {
+        background: #1c5bbf;
+        transform: scale(0.97);
+      }
+      .ui-panel button.reset {
+        background: #e74c3c;
+      }
+      .ui-panel button.reset:active {
+        background: #b93a27;
+      }
+      @media (max-width: 700px) {
+        .header {
+          font-size: 1.1rem;
+          padding: 8px 10px;
+        }
+        .ui-panel {
+          min-width: 160px;
+          padding: 12px 8px 8px 8px;
+          font-size: 0.95rem;
+          top: 10px;
+          right: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <!-- <div class="header">Cone vs Cylinder Volume Visualization</div> -->
+      <div class="three-panel">
+        <canvas id="three-canvas"></canvas>
+        <div class="ui-panel" id="ui-panel">
+          <button
+            id="toggle-panel"
+            style="
+              position: absolute;
+              top: 8px;
+              right: 8px;
+              z-index: 20;
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              background: #181c20;
+              color: #fff;
+              border: none;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+              cursor: pointer;
+            "
+          >
+            &#8963;
+          </button>
+          <h2>Volumes</h2>
+          <div class="dimension-controls">
+            <label>
+              Cone Radius:
+              <input
+                type="range"
+                id="coneRadiusSlider"
+                min="2"
+                max="10"
+                step="0.1"
+                value="5"
+              />
+              <span id="coneRadiusValue">5</span>
+            </label>
+            <label>
+              Cone Height:
+              <input
+                type="range"
+                id="coneHeightSlider"
+                min="5"
+                max="25"
+                step="0.1"
+                value="15"
+              />
+              <span id="coneHeightValue">15</span>
+            </label>
+            <label>
+              Cylinder Radius:
+              <input
+                type="range"
+                id="cylRadiusSlider"
+                min="2"
+                max="10"
+                step="0.1"
+                value="5"
+              />
+              <span id="cylRadiusValue">5</span>
+            </label>
+            <label>
+              Cylinder Height:
+              <input
+                type="range"
+                id="cylHeightSlider"
+                min="5"
+                max="25"
+                step="0.1"
+                value="15"
+              />
+              <span id="cylHeightValue">15</span>
+            </label>
+          </div>
+          <div class="volumes">
+            Cone: <span id="cone-vol">0</span> <br />
+            Cylinder: <span id="cyl-vol">0</span>
+          </div>
+          <div class="ratio">
+            Ratio (Cone:Cylinder): <span id="vol-ratio">0:0</span>
+          </div>
+          <div class="controls">
+            <button onclick="pourLiquid()">Pour</button>
+            <button class="reset" onclick="resetScene()">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // --- Parameters ---
+      let coneRadius = 5;
+      let coneHeight = 15;
+      let cylRadius = 5;
+      let cylHeight = 15;
+      let maxPours = 3; // Will be recalculated dynamically
+
+      // --- Three.js Setup ---
+      let scene, camera, renderer, controls;
+      let coneMesh, coneLiquidMesh, cylMesh, cylLiquidMesh, groundMesh;
+      let conePivot, coneLiquidPivot;
+      let coneMat; // Make coneMat global
+      let coneLiquidMat; // Make coneLiquidMat global
+      let cylLiquidMat; // Make cylLiquidMat global
+      let cylMat; // Make cylMat global
+      let pourCount = 0;
+      let pouring = false;
+
+      function setupScene() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x181c20);
+
+        // Camera
+        camera = new THREE.PerspectiveCamera(
+          60,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000,
+        );
+        camera.position.set(0, 18, 38);
+        camera.lookAt(0, 8, 0);
+
+        // Renderer
+        renderer = new THREE.WebGLRenderer({
+          canvas: document.getElementById("three-canvas"),
+          antialias: true,
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = false;
+
+        // OrbitControls
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.minDistance = 10;
+        controls.maxDistance = 100;
+        controls.target.set(0, 8, 0);
+        controls.update();
+
+        // Lights
+        const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+        scene.add(ambient);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+        dirLight.position.set(18, 32, 18);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        scene.add(dirLight);
+
+        // Ground
+        const groundGeo = new THREE.PlaneGeometry(60, 40);
+        const groundMat = new THREE.MeshStandardMaterial({
+          color: 0x23272b,
+          roughness: 0.8,
+        });
+        groundMesh = new THREE.Mesh(groundGeo, groundMat);
+        groundMesh.rotation.x = -Math.PI / 2;
+        groundMesh.position.y = -0.1;
+        groundMesh.receiveShadow = false;
+        scene.add(groundMesh);
+
+        // Cone
+        const coneGeo = new THREE.ConeGeometry(
+          coneRadius,
+          coneHeight,
+          64,
+          1,
+          true,
+        );
+        coneMat = new THREE.MeshPhysicalMaterial({
+          color: 0x99bbdd, // stronger blue glass
+          roughness: 0.08,
+          metalness: 0.0,
+          clearcoat: 0.8,
+          clearcoatRoughness: 0.1,
+          reflectivity: 0.5,
+          transmission: 0.7,
+          ior: 1.5,
+          opacity: 0.88,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+        coneMesh = new THREE.Mesh(coneGeo, coneMat);
+        // Position cone upright, base at y=0
+        coneMesh.position.set(-8, coneHeight / 2, 0);
+        coneMesh.rotation.x = Math.PI; // Invert cone: base at top, tip at bottom
+        coneMesh.castShadow = false;
+        scene.add(coneMesh);
+
+        // Cone Liquid
+        const coneLiquidGeo = new THREE.ConeGeometry(
+          coneRadius * 0.98,
+          coneHeight * 0.98,
+          64,
+          1,
+          true,
+        );
+        coneLiquidMat = new THREE.MeshPhysicalMaterial({
+          color: 0x0077be, // deeper blue for visibility
+          roughness: 0.02,
+          metalness: 0.0,
+          transmission: 0.7,
+          ior: 1.33,
+          opacity: 0.95,
+          transparent: true,
+          reflectivity: 0.8,
+          clearcoat: 0.6,
+          clearcoatRoughness: 0.05,
+          emissive: 0x0077be,
+          emissiveIntensity: 0.2,
+          side: THREE.DoubleSide,
+        });
+        coneLiquidMesh = new THREE.Mesh(coneLiquidGeo, coneLiquidMat);
+        // Position cone liquid upright, base at y=0
+        coneLiquidMesh.position.set(-8, coneHeight / 2, 0);
+        coneLiquidMesh.rotation.x = Math.PI; // Invert liquid: base at top, tip at bottom
+        coneLiquidMesh.castShadow = false;
+        coneLiquidMesh.scale.y = 1; // Cone liquid is full at start
+        scene.add(coneLiquidMesh);
+
+        // Cylinder
+        const cylGeo = new THREE.CylinderGeometry(
+          cylRadius,
+          cylRadius,
+          cylHeight,
+          64,
+          1,
+          true,
+        );
+        cylMat = new THREE.MeshPhysicalMaterial({
+          color: 0x99bbdd, // stronger blue glass
+          roughness: 0.08,
+          metalness: 0.0,
+          clearcoat: 0.8,
+          clearcoatRoughness: 0.1,
+          reflectivity: 0.5,
+          transmission: 0.7,
+          ior: 1.5,
+          opacity: 0.88,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+        cylMesh = new THREE.Mesh(cylGeo, cylMat);
+        // Position cylinder upright, base at y=0
+        cylMesh.position.set(8, cylHeight / 2, 0);
+        cylMesh.castShadow = false;
+        scene.add(cylMesh);
+
+        // Cylinder Liquid
+        const cylLiquidGeo = new THREE.CylinderGeometry(
+          cylRadius * 0.98,
+          cylRadius * 0.98,
+          0.01,
+          64,
+          1,
+          true,
+        );
+        cylLiquidMat = new THREE.MeshPhysicalMaterial({
+          color: 0x0077be, // match cone liquid for continuity
+          roughness: 0.02,
+          metalness: 0.0,
+          transmission: 0.7,
+          ior: 1.33,
+          opacity: 0.98, // increased for vibrancy
+          transparent: true,
+          reflectivity: 0.8,
+          clearcoat: 0.6,
+          clearcoatRoughness: 0.05,
+          emissive: 0x0077be,
+          emissiveIntensity: 0.3, // increased for vibrancy
+          side: THREE.DoubleSide,
+        });
+        cylLiquidMesh = new THREE.Mesh(cylLiquidGeo, cylLiquidMat);
+        // Position cylinder liquid upright, base at y=0
+        cylLiquidMesh.position.set(8, 0.005, 0);
+        cylLiquidMesh.castShadow = false;
+        cylLiquidMesh.scale.y = 0; // Cylinder liquid is empty at start
+        scene.add(cylLiquidMesh);
+
+        window.addEventListener("resize", onWindowResize, false);
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      // --- Animation Loop ---
+      function animate() {
+        controls.update();
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+
+      // --- Pour Logic ---
+      function pourLiquid() {
+        if (pouring || pourCount >= maxPours) return;
+        pouring = true;
+        pourCount++;
+
+        // Step 1: Lift cone vertically so its BASE is at cylinder opening
+        const coneBaseY = cylHeight;
+        const coneBaseOffset = coneHeight / 2; // mesh origin is center
+        gsap.to(coneMesh.position, {
+          y: coneBaseY + coneBaseOffset,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+        gsap.to(coneLiquidMesh.position, {
+          y: coneBaseY + coneBaseOffset,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+
+        // Step 2: Move cone horizontally to cylinder center
+        setTimeout(() => {
+          // Step 2: Move cone horizontally so its BASE is directly above cylinder center
+          const coneTargetX = 0; // cylinder's x
+          gsap.to(coneMesh.position, {
+            x: coneTargetX,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+          gsap.to(coneLiquidMesh.position, {
+            x: coneTargetX,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+
+          // Step 3: Rotate cone clockwise 90 degrees (tip points down)
+          setTimeout(() => {
+            const tiltAngle = Math.PI / 2; // 90 degrees clockwise
+            gsap.to(coneMesh.rotation, {
+              z: tiltAngle,
+              duration: 0.5,
+              ease: "power2.out",
+            });
+            gsap.to(coneLiquidMesh.rotation, {
+              z: tiltAngle,
+              duration: 0.5,
+              ease: "power2.out",
+            });
+
+            // Step 4: Show liquid stream from cone tip to cylinder opening
+            setTimeout(() => {
+              if (!window.pourStream) {
+                const streamGeo = new THREE.CylinderGeometry(
+                  0.18,
+                  0.18,
+                  cylHeight * 0.95,
+                  16,
+                );
+                const streamMat = new THREE.MeshPhysicalMaterial({
+                  color: 0x1e90ff,
+                  transparent: true,
+                  opacity: 0.7,
+                  transmission: 0.8,
+                });
+                window.pourStream = new THREE.Mesh(streamGeo, streamMat);
+                // Place stream from cone tip to cylinder opening
+                // Cone tip position: (coneTargetX, coneBaseY + coneBaseOffset - coneHeight, 0)
+                // Cylinder opening: (coneTargetX, cylHeight, 0)
+                window.pourStream.position.set(
+                  coneTargetX + coneHeight / 2,
+                  coneBaseY +
+                    coneBaseOffset -
+                    coneHeight +
+                    (cylHeight * 0.95) / 2,
+                  0,
+                );
+                window.pourStream.rotation.z = 0; // vertical
+                window.pourStream.visible = false;
+                scene.add(window.pourStream);
+              }
+              window.pourStream.visible = true;
+              window.pourStream.scale.y = 0;
+              gsap.to(window.pourStream.scale, {
+                y: 1,
+                duration: 0.7,
+                ease: "power2.inOut",
+              });
+
+              // Step 5: Animate liquid levels
+              setTimeout(() => {
+                // Animate cone liquid "shrinking"
+                // Remove old cone liquid mesh for realism
+                scene.remove(coneLiquidMesh);
+
+                // Calculate new height and base radius for liquid
+                const h_new = coneHeight * (1 - pourCount / maxPours);
+                const r_new = coneRadius * (h_new / coneHeight);
+
+                if (h_new > 0) {
+                  const fitFactor = 0.995;
+                  const coneLiquidGeo = new THREE.ConeGeometry(
+                    r_new * fitFactor,
+                    h_new * fitFactor,
+                    64,
+                    1,
+                    false, // openEnded: false, so the top is closed
+                  );
+                  coneLiquidMesh = new THREE.Mesh(coneLiquidGeo, coneLiquidMat);
+                  // Synchronize position and rotation with main cone
+                  coneLiquidMesh.position.copy(coneMesh.position);
+                  coneLiquidMesh.rotation.copy(coneMesh.rotation);
+                  coneLiquidMesh.visible = true;
+                  scene.add(coneLiquidMesh);
+                } else {
+                  coneLiquidMesh.visible = false;
+                }
+
+                // Animate cylinder liquid "rising"
+                const cylLiquidTargetHeight =
+                  cylHeight * (pourCount / maxPours);
+                gsap.to(cylLiquidMesh.scale, {
+                  y: cylLiquidTargetHeight / 0.01,
+                  duration: 1.1,
+                  ease: "power2.inOut",
+                  onComplete: () => {
+                    // Ensure cylinder liquid remains filled after three pours
+                    if (pourCount >= maxPours) {
+                      // Remove old cylinder liquid mesh
+                      scene.remove(cylLiquidMesh);
+                      // Create new geometry for full cylinder liquid with fit factor
+                      const fitFactor = 0.99;
+                      const cylLiquidGeoFull = new THREE.CylinderGeometry(
+                        cylRadius * fitFactor,
+                        cylRadius * fitFactor,
+                        cylHeight * fitFactor,
+                        64,
+                        1,
+                        false, // openEnded: false, so the top is closed
+                      );
+                      cylLiquidMesh = new THREE.Mesh(
+                        cylLiquidGeoFull,
+                        cylLiquidMat,
+                      );
+                      cylLiquidMesh.position.set(8, cylHeight / 2, 0);
+                      cylLiquidMesh.rotation.x = 0;
+                      cylLiquidMesh.visible = true;
+                      scene.add(cylLiquidMesh);
+                    }
+                  },
+                });
+                gsap.to(cylLiquidMesh.position, {
+                  y: cylLiquidTargetHeight / 2,
+                  duration: 1.1,
+                  ease: "power2.inOut",
+                  onUpdate: updateVolumes,
+                  onComplete: () => {
+                    pouring = false;
+                    updateVolumes();
+
+                    // Step 6: Hide stream, return cone to original position and orientation
+                    gsap.to(window.pourStream.scale, {
+                      y: 0,
+                      duration: 0.6,
+                      ease: "power2.inOut",
+                      onComplete: () => {
+                        window.pourStream.visible = false;
+                      },
+                    });
+                    gsap.to(coneMesh.position, {
+                      x: -8,
+                      y: coneHeight / 2,
+                      duration: 0.6,
+                      ease: "power2.inOut",
+                    });
+                    gsap.to(coneLiquidMesh.position, {
+                      x: -8,
+                      y: coneHeight / 2,
+                      duration: 0.6,
+                      ease: "power2.inOut",
+                    });
+                    gsap.to(coneMesh.rotation, {
+                      z: 0,
+                      duration: 0.6,
+                      ease: "power2.inOut",
+                    });
+                    gsap.to(coneLiquidMesh.rotation, {
+                      z: 0,
+                      duration: 0.6,
+                      ease: "power2.inOut",
+                    });
+                  },
+                });
+              }, 700); // Wait for stream to appear
+            }, 500); // Wait for rotation
+          }, 500); // Wait for horizontal move
+        }, 500); // Wait for vertical lift
+      }
+
+      function resetScene() {
+        if (pouring) return;
+        pourCount = 0;
+        // Reset cone liquid
+        // Remove old cone liquid mesh and recreate full liquid
+        scene.remove(coneLiquidMesh);
+        const fitFactor = 0.995;
+        const coneLiquidGeo = new THREE.ConeGeometry(
+          coneRadius * fitFactor,
+          coneHeight * fitFactor,
+          64,
+          1,
+          false, // openEnded: false, so the top is closed
+        );
+        coneLiquidMesh = new THREE.Mesh(coneLiquidGeo, coneLiquidMat);
+        // Position cone liquid so tip is at y=0, base at y=coneHeight
+        coneLiquidMesh.position.set(-8, coneHeight / 2, 0);
+        coneLiquidMesh.rotation.x = Math.PI;
+        coneLiquidMesh.visible = true;
+        scene.add(coneLiquidMesh);
+
+        // Remove old cone and cylinder meshes
+        scene.remove(coneMesh);
+        scene.remove(cylMesh);
+
+        // Create new cone mesh
+        const coneGeo = new THREE.ConeGeometry(
+          coneRadius,
+          coneHeight,
+          64,
+          1,
+          false,
+        );
+        coneMesh = new THREE.Mesh(coneGeo, coneMat);
+        coneMesh.position.set(-8, coneHeight / 2, 0);
+        coneMesh.rotation.x = Math.PI;
+        coneMesh.visible = true;
+        scene.add(coneMesh);
+
+        // Create new cylinder mesh
+        const cylGeo = new THREE.CylinderGeometry(
+          cylRadius,
+          cylRadius,
+          cylHeight,
+          64,
+          1,
+          false,
+        );
+        cylMesh = new THREE.Mesh(cylGeo, cylMat);
+        cylMesh.position.set(8, cylHeight / 2, 0);
+        cylMesh.rotation.x = 0;
+        cylMesh.visible = true;
+        scene.add(cylMesh);
+
+        // Reset cylinder liquid
+        scene.remove(cylLiquidMesh);
+        const cylLiquidGeo = new THREE.CylinderGeometry(
+          cylRadius * 0.99,
+          cylRadius * 0.99,
+          0.01, // minimal height for empty
+          64,
+          1,
+          false,
+        );
+        cylLiquidMesh = new THREE.Mesh(cylLiquidGeo, cylLiquidMat);
+        cylLiquidMesh.position.set(8, 0.005, 0);
+        cylLiquidMesh.rotation.x = 0;
+        cylLiquidMesh.visible = true;
+        scene.add(cylLiquidMesh);
+
+        // Camera reset
+        gsap.to(camera.position, {
+          x: 0,
+          y: 18,
+          z: 38,
+          duration: 0.7,
+          ease: "power1.inOut",
+        });
+        updateVolumes();
+      }
+
+      // --- UI Updates ---
+      function updateVolumes() {
+        // Cone liquid volume
+        const coneLiquidHeight = coneHeight * 0.98 * coneLiquidMesh.scale.y;
+        const coneLiquidVol =
+          (Math.PI * Math.pow(coneRadius * 0.98, 2) * coneLiquidHeight) / 3;
+        // Cylinder liquid volume
+        const cylLiquidHeight = cylHeight * cylLiquidMesh.scale.y;
+        const cylLiquidVol =
+          Math.PI * Math.pow(cylRadius * 0.98, 2) * cylLiquidHeight;
+
+        document.getElementById("cone-vol").textContent =
+          coneLiquidVol.toFixed(2) + " u³";
+        document.getElementById("cyl-vol").textContent =
+          cylLiquidVol.toFixed(2) + " u³";
+        document.getElementById("vol-ratio").textContent =
+          `${coneLiquidVol.toFixed(2)} : ${cylLiquidVol.toFixed(2)}`;
+      }
+
+      // --- Initialization ---
+      setupScene();
+      animate();
+      updateVolumes();
+
+      // Interactive sliders for dimensions
+      function updateDimensionDisplays() {
+        document.getElementById("coneRadiusValue").textContent = coneRadius;
+        document.getElementById("coneHeightValue").textContent = coneHeight;
+        document.getElementById("cylRadiusValue").textContent = cylRadius;
+        document.getElementById("cylHeightValue").textContent = cylHeight;
+      }
+
+      function recalculateMaxPours() {
+        // Calculate volumes using current slider values
+        const coneVolume = (Math.PI * coneRadius * coneRadius * coneHeight) / 3;
+        const cylVolume = Math.PI * cylRadius * cylRadius * cylHeight;
+        maxPours = cylVolume / coneVolume;
+      }
+
+      function setupDimensionSliders() {
+        const coneRadiusSlider = document.getElementById("coneRadiusSlider");
+        const coneHeightSlider = document.getElementById("coneHeightSlider");
+        const cylRadiusSlider = document.getElementById("cylRadiusSlider");
+        const cylHeightSlider = document.getElementById("cylHeightSlider");
+
+        coneRadiusSlider.addEventListener("input", function () {
+          coneRadius = parseFloat(this.value);
+          updateDimensionDisplays();
+          recalculateMaxPours();
+          resetScene();
+        });
+        coneHeightSlider.addEventListener("input", function () {
+          coneHeight = parseFloat(this.value);
+          updateDimensionDisplays();
+          recalculateMaxPours();
+          resetScene();
+        });
+        cylRadiusSlider.addEventListener("input", function () {
+          cylRadius = parseFloat(this.value);
+          updateDimensionDisplays();
+          recalculateMaxPours();
+          resetScene();
+        });
+        cylHeightSlider.addEventListener("input", function () {
+          cylHeight = parseFloat(this.value);
+          updateDimensionDisplays();
+          recalculateMaxPours();
+          resetScene();
+        });
+      }
+
+      setupDimensionSliders();
+      updateDimensionDisplays();
+      recalculateMaxPours();
+
+      // Expose pour/reset for buttons
+      window.pourLiquid = pourLiquid;
+      window.resetScene = resetScene;
+    </script>
+    <script>
+      // Collapsible UI Panel logic (collapse up)
+      const uiPanel = document.getElementById("ui-panel");
+      const toggleBtn = document.getElementById("toggle-panel");
+      let panelOpen = true;
+
+      toggleBtn.addEventListener("click", () => {
+        panelOpen = !panelOpen;
+        if (panelOpen) {
+          uiPanel.classList.remove("collapsed");
+          toggleBtn.innerHTML = "&#8963;"; // Up arrow
+        } else {
+          uiPanel.classList.add("collapsed");
+          toggleBtn.innerHTML = "&#8964;"; // Down arrow
+        }
+      });
+    </script>
+  </body>
+</html>
