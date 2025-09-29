@@ -8,7 +8,9 @@ import serviceWorker from "astrojs-service-worker";
 
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.CI ? "https://sredsol.com" : `http://localhost:4321`,
+  site: process.env.CI
+    ? "https://sredsol-com.shsarmaknl.workers.dev"
+    : `http://localhost:4321`,
   // base: process.env.CI ? '/' : undefined,
 
   // output: 'server',
