@@ -30,3 +30,13 @@ import ContactUs from '../components/ContactUs.astro';
   src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
   type="module"
 ></script>
+
+<!-- Cal floating-popup embed code begins -->
+<script is:inline type="text/javascript">
+  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://schedule.sredsol.com/embed/embed.js", "init");
+Cal("init", "ils-demo", {origin:"https://schedule.sredsol.com"});
+
+  Cal.ns["ils-demo"]("floatingButton", {"calLink":"admin-sredsol.com/ils-demo","config":{"layout":"month_view"},"buttonText":"Book a Demo","buttonColor":"#1c4ed8","buttonPosition":"bottom-right"});
+  Cal.ns["ils-demo"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#1820aa"},"dark":{"cal-brand":"#ebf5ff"}},"hideEventTypeDetails":false,"layout":"month_view"});
+  </script>
+  <!-- Cal floating-popup embed code ends -->

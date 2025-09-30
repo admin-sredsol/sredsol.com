@@ -3,6 +3,7 @@
 import LayoutCommon from './LayoutCommon.astro';
 import NavBarStacked from './NavBarStacked.astro';
 import Footer from '../components/Footer.astro';
+import ScrollUpButton from '../components/ScrollUpButton.astro';
 ---
 
 <LayoutCommon>
@@ -17,6 +18,7 @@ import Footer from '../components/Footer.astro';
 				<slot />
 			</div>
 
+			<ScrollUpButton />
 			<Footer />
 			<!-- <FooterStacked /> -->
 		</div>

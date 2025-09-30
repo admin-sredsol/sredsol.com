@@ -41,6 +41,25 @@ const { class: clazz } = Astro.props;
 				document.documentElement.classList.remove('dark');
 			}
 		</script>
+		<script  is:inline defer src="https://tracking.sredsol.com/script.js" data-website-id="0a69bc0f-6ba5-4884-b2d8-34b65aae7010"></script>
+		<script is:inline>
+  window.chatwootSettings = {"position":"left","type":"standard","launcherTitle":"Chat with us"};
+  (function(d,t) {
+    var BASE_URL="https://chat-server.sredsol.com";
+    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=BASE_URL+"/packs/js/sdk.js";
+    g.defer = true;
+    g.async = true;
+    s.parentNode.insertBefore(g,s);
+    g.onload=function(){
+      window.chatwootSDK.run({
+        websiteToken: '19jD57GAKN5Th4o4rixEFy4H',
+        baseUrl: BASE_URL
+      })
+    }
+  })(document,"script");
+</script>
+
 	</head>
 	<body
 		class:list={[
