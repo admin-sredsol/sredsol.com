@@ -10,6 +10,6 @@ description: Interactive activity to explore Mean, Median and Mode.
 <div style="margin-top:2em; margin-bottom:2em;">
   <iframe
     id="8m5a1-iframe"
-    src="http://localhost:4321/examples/8m5a1.html"
+    src="/examples/8m5a1.html"
   ></iframe>
 </div>

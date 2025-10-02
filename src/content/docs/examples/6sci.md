@@ -10,6 +10,6 @@ description: Interactive activity to explore Ratios and Proportions.
 <div style="margin-top:2em; margin-bottom:2em;">
   <iframe
     id="ratio-proportion-iframe"
-    src="http://localhost:4321/examples/6sci1a1.html"
+    src="/examples/6sci1a1.html"
   ></iframe>
 </div>
