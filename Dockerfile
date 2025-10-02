@@ -34,8 +34,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-# Copy .env if present (optional, for runtime env vars)
-COPY --from=builder /app/.env .env
+# .env file is not copied; environment variables are set via build args and ENV
 
 # Set runtime environment variables
 ENV HOST=0.0.0.0
