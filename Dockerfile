@@ -20,5 +20,8 @@ RUN pnpm build
 # Expose the port Astro SSR runs on (default 4321)
 EXPOSE 4321
 
+# Listen on all hosts
+ENV HOST=0.0.0.0
+
 # Start the SSR server
 CMD ["node", "./dist/server/entry.mjs"]
