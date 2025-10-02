@@ -15,45 +15,48 @@ description: Interactive Virtual Lab Activities Mapped to the Syllabus.
 
 | Chapter No. | Chapter Name | No. of Activities |
 |-------------|--------------|-------------------|
-| 1           | [Numbers](#numbers)   | 2                 |
-| 2           | [Fractions](#fractions) | 2                 |
-| 3           | [Geometry](#geometry)   | 3                 |
+| 1  | [Integers ](#numbers)   | 3                 |
+| 2  | [Fractions and Decimals ](#fractions) | 6                 |
+| 3  | [Data Handling ](#geometry)   | 4                 |
+| 4  | [Simple Equations l Ideas](#geometry)| 4                 |
+| 5  | [Lines and Angles ](#geometry) | 6                |
+| 6  | [The Triangle and its Properties](#geometry)| 7                 |
+| 7  | [Comparing Quantities ](#geometry)   | 4                 |
+| 8  | [Rational Numbers ](#geometry)   | 3                 |
+| 9  | [Perimeter and Area ](#geometry)   | 3                 |
+| 10  | [Algebric Expression ](#geometry)   | 3                 |
+| 11  | [Exponents and Powers ](#geometry)   | 3                 |
+| 12  | [Symmetry ](#geometry)   | 3                 |
+| 13  | [Visualising Solid Shapes ](#geometry)   | 3                 |
+|     | **Total**   | **52**                |
 
 ---
 
-## Numbers
-- **Place Value Explorer** 🧪
-  _Interactive tool to understand place values._ [Try it](#)
-- **Number Line Game** 🎮
-  _Practice number placement on a line._ [Try it](#)
+## Integers
 
----
+## Fractions and Decimals
 
-## Fractions
-- **Fraction Lab** 🧪
-  _Visualize and compare fractions._ [Try it](#)
-- **Fraction Challenge** 🎮
-  _Game to master fraction operations._ [Try it](#)
+## Data Handling
 
----
+## Simple Equations
 
-## Geometry
-- **Shapes Builder** 🎮
-  _Create and identify geometric shapes._ [Try it](#)
-- **Angle Explorer** 🧪
-  _Interactive activity to learn about angles._ [Try it](#)
-- <div style="margin-top:2em; margin-bottom:2em;">
-    <strong>Cone & Cylinder Explorer</strong> 🧪
-    <em>Interactive activity to explore cones and cylinders.</em><br>
-    <button onclick="document.getElementById('cone-cylinder-iframe').style.display='block';">Try it</button>
-    <br>
-    <iframe id="cone-cylinder-iframe" src="http://localhost:4321/cone-cylinder.html" style="display:none;"></iframe>
-  </div>
+## Lines and Angles
 
----
+## The Triangle and its Properties
 
+## Comparing Quantities
 
+## Rational Numbers
 
+## Perimeter and Area
+
+## Algebric Expression
+
+## Exponents and Powers
+
+## Symmetry
+
+## Visualising Solid Shapes
 
 <!-- You can add more chapters and activities following the same format.
 Replace [Try it](#) with actual links to your activities.

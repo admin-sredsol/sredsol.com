@@ -15,13 +15,22 @@ description: Interactive Virtual Lab Activities Mapped to the Syllabus.
 
 | Chapter No. | Chapter Name | No. of Activities |
 |-------------|--------------|-------------------|
-| 1           | [Numbers](#numbers)   | 2                 |
-| 2           | [Fractions](#fractions) | 2                 |
-| 3           | [Geometry](#geometry)   | 3                 |
-
+| 1  | [Knowing Our Numbers](#numbers)   | 4                 |
+| 2  | [Whole Numbers](#fractions) | 4                 |
+| 3  | [Playing With Numbers](#geometry)   | 4                 |
+| 4  | [Basic Geometrical Ideas](#geometry)| 5                 |
+| 5  | [Understanding Elementary Shapes](#geometry) | 5                 |
+| 6  | [Integers](#geometry)   | 4                 |
+| 7  | [Fractions](#geometry)   | 6                 |
+| 8  | [Decimals ](#geometry)   | 3                 |
+| 9  | [Data Handling ](#geometry)   | 3                 |
+| 10  | [Mensuration ](#geometry)   | 3                 |
+| 11  | [Algebra ](#geometry)   | 3                 |
+| 12  | [Ratio and Proportion](#geometry)   | 3                 |
+|     | **Total**   | **46**                |
 ---
 
-## Numbers
+## Knowing Our Numbers
 - **Place Value Explorer** 🧪
   _Interactive tool to understand place values._ [Try it](#)
 - **Number Line Game** 🎮
@@ -29,7 +38,7 @@ description: Interactive Virtual Lab Activities Mapped to the Syllabus.
 
 ---
 
-## Fractions
+## Whole Numbers
 - **Fraction Lab** 🧪
   _Visualize and compare fractions._ [Try it](#)
 - **Fraction Challenge** 🎮
@@ -37,7 +46,7 @@ description: Interactive Virtual Lab Activities Mapped to the Syllabus.
 
 ---
 
-## Geometry
+## Playing With Numbers
 - **Shapes Builder** 🎮
   _Create and identify geometric shapes._ [Try it](#)
 - **Angle Explorer** 🧪
@@ -52,8 +61,23 @@ description: Interactive Virtual Lab Activities Mapped to the Syllabus.
 
 ---
 
+## Basic Geometrical Ideas
 
+## Understanding Elementary Shapes
 
+## Integers
+
+## Fractions
+
+## Decimals
+
+## Data Handling
+
+## Mensuration
+
+## Algebra
+
+## Ratio and Proportion
 
 <!-- You can add more chapters and activities following the same format.
 Replace [Try it](#) with actual links to your activities.

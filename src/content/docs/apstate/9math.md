@@ -15,9 +15,19 @@ description: Interactive Virtual Lab Activities Mapped to the Syllabus.
 
 | Chapter No. | Chapter Name | No. of Activities |
 |-------------|--------------|-------------------|
-| 1           | [Numbers](#numbers)   | 2                 |
-| 2           | [Fractions](#fractions) | 2                 |
-| 3           | [Geometry](#geometry)   | 3                 |
+| 1  | [Knowing Our Numbers](#numbers)   | 4                 |
+| 2  | [Whole Numbers](#fractions) | 4                 |
+| 3  | [Playing With Numbers](#geometry)   | 4                 |
+| 4  | [Basic Geometrical Ideas](#geometry)| 5                 |
+| 5  | [Understanding Elementary Shapes](#geometry) | 5                 |
+| 6  | [Integers](#geometry)   | 4                 |
+| 7  | [Fractions](#geometry)   | 6                 |
+| 8  | [Decimals ](#geometry)   | 3                 |
+| 9  | [Data Handling ](#geometry)   | 3                 |
+| 10  | [Mensuration ](#geometry)   | 3                 |
+| 11  | [Algebra ](#geometry)   | 3                 |
+| 12  | [Ratio and Proportion](#geometry)   | 3                 |
+|     | **Total**   | **46**                |
 
 ---
 
