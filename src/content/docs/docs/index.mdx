@@ -1,0 +1,52 @@
+---
+title: sredsol - Empowering Education through Technology
+description: Starlight theme inspired by the Visual Studio Code Vitesse theme.
+head:
+  - tag: title
+    content: sredsol
+  - tag: style
+    content: |
+      .hero-html {
+        --size: 12rem;
+        font-size: var(--size);
+        justify-content: center;
+        line-height: var(--size);
+      }
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+  tagline: Interactive Learning Space (I L S)
+  image:
+    html: '⚡'
+  actions:
+    - text: Get started
+      link: /docs/intro
+      icon: rocket
+    - text: Examples
+      link: /examples/6math/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components'
+
+## Next steps
+
+<CardGrid stagger>
+  <Card title="Purchase of ILS Server" icon="puzzle">
+    Check the [`Purchase Guide`](/docs/procurement/) for installation instructions.
+  </Card>
+  <Card title="Installation" icon="puzzle">
+    Check the [`Installation guide`](/docs/installation/) for installation instructions.
+  </Card>
+  <Card title="A.P. State Board"  icon="seti:image">
+    Check out the list of all the mapped activities [`AP State Activities`](/apstate/) to see the theme in
+    action.
+  </Card>
+  <Card title="Example Activities" icon="open-book">
+    Interact with some of Our Interactive Activities and Understand how do they help in improving learning and teaching [`Explore`](/examples/6math).
+  </Card>
+</CardGrid>
+
+---

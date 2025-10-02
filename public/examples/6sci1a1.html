@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Iodine Test - Starch Detection Simulation</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/gsap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            body {
+                overflow: hidden;
+                background: linear-gradient(to bottom, #1a2980, #26d0ce);
+                color: white;
+            }
+
+            #canvas-container {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .ui-panel {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                background: rgba(0, 0, 0, 0.7);
+                padding: 20px;
+                border-radius: 15px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+                max-width: 300px;
+                backdrop-filter: blur(10px);
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 15px;
+                color: #ffcc00;
+                text-align: center;
+            }
+
+            .test-type {
+                margin-bottom: 20px;
+                padding: 10px;
+                background: rgba(0, 30, 60, 0.8);
+                border-radius: 10px;
+                text-align: center;
+            }
+
+            .food-samples {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .food-item {
+                padding: 10px;
+                background: rgba(30, 30, 120, 0.7);
+                border-radius: 8px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .food-item:hover {
+                background: rgba(50, 50, 160, 0.9);
+                transform: translateY(-2px);
+            }
+
+            .food-item.selected {
+                background: rgba(70, 100, 200, 1);
+                box-shadow: 0 0 10px rgba(100, 150, 255, 0.8);
+            }
+
+            .reset-btn {
+                width: 100%;
+                padding: 12px;
+                background: linear-gradient(to right, #ff416c, #ff4b2b);
+                border: none;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .add-iodine-btn {
+                width: 100%;
+                padding: 12px;
+                background: linear-gradient(to right, #4b6cb7, #182848);
+                border: none;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                cursor: pointer;
+                margin-top: 10px;
+                transition: all 0.3s ease;
+            }
+            .add-iodine-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(75, 108, 183, 0.6);
+            }
+
+            .reset-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(255, 75, 43, 0.6);
+            }
+
+            .instructions {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.7);
+                padding: 15px;
+                border-radius: 10px;
+                text-align: center;
+                backdrop-filter: blur(10px);
+                max-width: 80%;
+            }
+
+            .reaction-info {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.7);
+                padding: 20px;
+                border-radius: 15px;
+                max-width: 300px;
+                backdrop-filter: blur(10px);
+                display: none;
+            }
+
+            .reaction-info h2 {
+                color: #ffcc00;
+                margin-bottom: 10px;
+            }
+
+            .starch-positive {
+                color: #4caf50;
+                font-weight: bold;
+            }
+
+            .starch-negative {
+                color: #f44336;
+                font-weight: bold;
+            }
+
+            .drag-icon {
+                position: absolute;
+                right: 30px;
+                top: 50%;
+                font-size: 24px;
+                animation: bounce 2s infinite;
+            }
+
+            @keyframes bounce {
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
+                    transform: translateY(0);
+                }
+                40% {
+                    transform: translateY(-20px);
+                }
+                60% {
+                    transform: translateY(-10px);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="canvas-container"></div>
+
+        <div class="ui-panel">
+            <h1>Iodine Test for Starch</h1>
+
+            <div class="test-type">
+                <strong>Selected Test:</strong> Iodine Test
+            </div>
+
+            <p>Select the food sample:</p>
+            <div class="food-samples">
+                <div class="food-item" data-food="carrot">Carrot</div>
+                <div class="food-item" data-food="wheat">Wheat</div>
+                <div class="food-item" data-food="apple">Apple</div>
+                <div class="food-item" data-food="egg">Egg</div>
+                <div class="food-item" data-food="tomato">Tomato</div>
+                <div class="food-item" data-food="oats">Oats</div>
+                <div class="food-item" data-food="potato">Potato</div>
+                <div class="food-item" data-food="bread">Bread</div>
+            </div>
+
+            <button class="reset-btn">Reset Experiment</button>
+            <button class="add-iodine-btn">Add Iodine</button>
+        </div>
+
+        <div class="instructions">
+            <p>Click "Add Iodine" to drop iodine solution on the food sample</p>
+            <div class="drag-icon" style="display: none">⬅️</div>
+        </div>
+
+        <div class="reaction-info">
+            <h2>Test Result</h2>
+            <p class="sample-name">Sample: <span></span></p>
+            <p class="starch-content">Starch: <span></span></p>
+            <p class="reaction-desc">Reaction: <span></span></p>
+        </div>
+
+        <script>
+            // Main Three.js variables
+            let scene, camera, renderer, controls;
+            let dropper,
+                iodineBottle,
+                foodSample,
+                selectedFood = null;
+            let isDragging = false;
+            let iodineDrops = [];
+
+            // Food starch data (realistic biological data)
+            const foodStarchData = {
+                carrot: {
+                    starch: "Low",
+                    reaction: "Yellow-brown",
+                    positive: false,
+                },
+                wheat: {
+                    starch: "High",
+                    reaction: "Blue-black",
+                    positive: true,
+                },
+                apple: {
+                    starch: "Low",
+                    reaction: "Yellow-brown",
+                    positive: false,
+                },
+                egg: {
+                    starch: "None",
+                    reaction: "Yellow-brown",
+                    positive: false,
+                },
+                tomato: {
+                    starch: "Low",
+                    reaction: "Yellow-brown",
+                    positive: false,
+                },
+                oats: {
+                    starch: "High",
+                    reaction: "Blue-black",
+                    positive: true,
+                },
+                potato: {
+                    starch: "Very High",
+                    reaction: "Dark blue-black",
+                    positive: true,
+                },
+                bread: {
+                    starch: "High",
+                    reaction: "Blue-black",
+                    positive: true,
+                },
+            };
+
+            // Initialize Three.js scene
+            function init() {
+                // Create scene
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x1a2980);
+
+                // Create camera
+                camera = new THREE.PerspectiveCamera(
+                    75,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    1000,
+                );
+                camera.position.set(0, 5, 10);
+
+                // Create renderer
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.enabled = true;
+                document
+                    .getElementById("canvas-container")
+                    .appendChild(renderer.domElement);
+
+                // Add orbit controls
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+
+                // Add lights
+                const ambientLight = new THREE.AmbientLight(0x404040);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(
+                    0xffffff,
+                    0.8,
+                );
+                directionalLight.position.set(10, 20, 10);
+                directionalLight.castShadow = true;
+                scene.add(directionalLight);
+
+                // Create lab environment
+                createLabEnvironment();
+
+                // Create iodine bottle and dropper
+                scene.add(createRealisticIodineBottle());
+                createDropper();
+
+                // Create initial food sample
+                createFoodSample("potato");
+
+                // Add event listeners
+                setupEventListeners();
+
+                // Start animation loop
+                animate();
+
+                // Handle window resize
+                window.addEventListener("resize", onWindowResize);
+            }
+
+            // Create laboratory environment
+            function createLabEnvironment() {
+                // Create lab table
+                const tableGeometry = new THREE.BoxGeometry(20, 1, 10);
+                const tableMaterial = new THREE.MeshLambertMaterial({
+                    color: 0x654321,
+                });
+                const table = new THREE.Mesh(tableGeometry, tableMaterial);
+                table.position.y = -2;
+                table.receiveShadow = true;
+                scene.add(table);
+
+                // Create lab backdrop
+                const backdropGeometry = new THREE.BoxGeometry(22, 10, 0.5);
+                const backdropMaterial = new THREE.MeshLambertMaterial({
+                    color: 0x808080,
+                });
+                const backdrop = new THREE.Mesh(
+                    backdropGeometry,
+                    backdropMaterial,
+                );
+                backdrop.position.set(0, 3, -5);
+                scene.add(backdrop);
+
+                // Add some laboratory equipment
+                const beakerGeometry = new THREE.CylinderGeometry(1, 1, 2, 32);
+                const beakerMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.7,
+                });
+                const beaker = new THREE.Mesh(beakerGeometry, beakerMaterial);
+                beaker.position.set(-5, 0, 0);
+                beaker.castShadow = true;
+                scene.add(beaker);
+
+                // Add subtle lighting to enhance realism
+                const pointLight = new THREE.PointLight(0xffffff, 0.5);
+                pointLight.position.set(0, 10, 0);
+                scene.add(pointLight);
+
+                // Add 'sredsol' label to the front face of the table
+                const tableLabelCanvas = document.createElement("canvas");
+                tableLabelCanvas.width = 512;
+                tableLabelCanvas.height = 128;
+                const tableLabelCtx = tableLabelCanvas.getContext("2d");
+                tableLabelCtx.clearRect(
+                    0,
+                    0,
+                    tableLabelCanvas.width,
+                    tableLabelCanvas.height,
+                );
+                tableLabelCtx.font = "bold 80px Arial";
+                tableLabelCtx.fillStyle = "#fff";
+                tableLabelCtx.textAlign = "center";
+                tableLabelCtx.textBaseline = "middle";
+                tableLabelCtx.fillText(
+                    "sredsol",
+                    tableLabelCanvas.width / 2,
+                    tableLabelCanvas.height / 2,
+                );
+                const tableLabelTexture = new THREE.CanvasTexture(
+                    tableLabelCanvas,
+                );
+
+                const tableLabelWidth = 8;
+                const tableLabelHeight = 0.7;
+                const tableLabelDepth = 0.05;
+                const tableLabelGeometry = new THREE.BoxGeometry(
+                    tableLabelWidth,
+                    tableLabelHeight,
+                    tableLabelDepth,
+                );
+                const tableLabelMaterial = new THREE.MeshPhongMaterial({
+                    map: tableLabelTexture,
+                    transparent: true,
+                });
+                const tableLabelMesh = new THREE.Mesh(
+                    tableLabelGeometry,
+                    tableLabelMaterial,
+                );
+                tableLabelMesh.position.set(0, -1.65, 5.03);
+                scene.add(tableLabelMesh);
+            }
+
+            // Create realistic iodine bottle
+            function createRealisticIodineBottle() {
+                const group = new THREE.Group();
+
+                // Parameters
+                const bodyHeight = 2.6;
+                const bodyRadiusTop = 0.7;
+                const bodyRadiusBottom = 0.9;
+                const neckHeight = 0.7;
+                const neckRadiusTop = 0.35;
+                const neckRadiusBottom = 0.5;
+                const capHeight = 0.25;
+                const capRadius = 0.38;
+                const liquidHeight = 1.7;
+                const labelWidth = 1.1;
+                const labelHeight = 0.4;
+                const labelDepth = 0.05;
+
+                // Bottle body (amber glass)
+                const bottleGeometry = new THREE.CylinderGeometry(
+                    bodyRadiusTop,
+                    bodyRadiusBottom,
+                    bodyHeight,
+                    48,
+                );
+                const bottleMaterial = new THREE.MeshPhysicalMaterial({
+                    color: 0x8b5c2a,
+                    transparent: true,
+                    opacity: 0.5,
+                    roughness: 0.15,
+                    metalness: 0.1,
+                    transmission: 0.7,
+                    thickness: 0.2,
+                    clearcoat: 0.5,
+                    clearcoatRoughness: 0.1,
+                });
+                const bottle = new THREE.Mesh(bottleGeometry, bottleMaterial);
+                bottle.position.y = bodyHeight / 2;
+                group.add(bottle);
+
+                // Bottle neck (amber glass)
+                const neckGeometry = new THREE.CylinderGeometry(
+                    neckRadiusTop,
+                    neckRadiusBottom,
+                    neckHeight,
+                    32,
+                );
+                const neckMaterial = bottleMaterial.clone();
+                const neck = new THREE.Mesh(neckGeometry, neckMaterial);
+                neck.position.y = bodyHeight + neckHeight / 2 - 0.1;
+                group.add(neck);
+
+                // Liquid inside (dark brown)
+                const liquidGeometry = new THREE.CylinderGeometry(
+                    bodyRadiusTop * 0.97,
+                    bodyRadiusBottom * 0.97,
+                    liquidHeight,
+                    32,
+                );
+                const liquidMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x4b2e09,
+                    transparent: true,
+                    opacity: 0.7,
+                    shininess: 60,
+                });
+                const liquid = new THREE.Mesh(liquidGeometry, liquidMaterial);
+                // Place liquid inside the bottle, slightly lower than the top
+                liquid.position.y = liquidHeight / 2 + 0.15;
+                group.add(liquid);
+
+                // Label with "Iodine" text using a canvas texture
+                const canvas = document.createElement("canvas");
+                canvas.width = 256;
+                canvas.height = 64;
+                const ctx = canvas.getContext("2d");
+                // Fill background (white label)
+                ctx.fillStyle = "#fff";
+                ctx.globalAlpha = 0.92;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // Draw text
+                ctx.globalAlpha = 1.0;
+                ctx.font = "bold 40px Arial";
+                ctx.fillStyle = "#222";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("Iodine", canvas.width / 2, canvas.height / 2);
+                // Create texture from canvas
+                const labelTexture = new THREE.CanvasTexture(canvas);
+                // Label geometry and material
+                const labelGeometry = new THREE.BoxGeometry(
+                    labelWidth,
+                    labelHeight,
+                    labelDepth,
+                );
+                const labelMaterial = new THREE.MeshPhongMaterial({
+                    map: labelTexture,
+                    transparent: true,
+                    opacity: 0.92,
+                });
+                const label = new THREE.Mesh(labelGeometry, labelMaterial);
+                label.position.set(
+                    0,
+                    bodyHeight * 0.55,
+                    bodyRadiusBottom + labelDepth / 2 + 0.01,
+                );
+                group.add(label);
+
+                // Optional: Add "Iodine" text using a canvas texture
+                // (This requires font loading and is omitted for brevity. You can add a texture to labelMaterial.map.)
+
+                // Set the group position (default: right side of table)
+                group.position.set(6, -2, 0);
+
+                return group;
+            }
+
+            // Create dropper
+            function createDropper() {
+                const group = new THREE.Group();
+
+                // Dropper bulb
+                const bulbGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+                const bulbMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xff0000,
+                    transparent: true,
+                    opacity: 0.7,
+                });
+                const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
+                bulb.position.y = 1.5;
+                group.add(bulb);
+
+                // Dropper tube
+                const tubeGeometry = new THREE.CylinderGeometry(
+                    0.1,
+                    0.1,
+                    2,
+                    32,
+                );
+                const tubeMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xff0000,
+                });
+                const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+                tube.position.y = 0.5;
+                group.add(tube);
+
+                group.position.set(6, 0, 0);
+                scene.add(group);
+                dropper = group;
+            }
+
+            // Create food sample
+            function createFoodSample(foodType) {
+                if (foodSample) {
+                    scene.remove(foodSample);
+                }
+
+                const group = new THREE.Group();
+                let geometry, material;
+
+                switch (foodType) {
+                    case "carrot":
+                        // Realistic test tube assembly
+                        const tubeHeight = 2;
+                        const tubeRadius = 0.3;
+
+                        // Main body (transparent cylinder)
+                        const tubeBodyGeometry = new THREE.CylinderGeometry(
+                            tubeRadius,
+                            tubeRadius,
+                            tubeHeight,
+                            32,
+                        );
+                        const tubeBodyMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xffffff,
+                            transparent: true,
+                            opacity: 0.25,
+                        });
+                        const tubeBody = new THREE.Mesh(
+                            tubeBodyGeometry,
+                            tubeBodyMaterial,
+                        );
+                        tubeBody.position.y = 0.5;
+                        group.add(tubeBody);
+
+                        // Rounded bottom (hemisphere)
+                        const bottomGeometry = new THREE.SphereGeometry(
+                            tubeRadius,
+                            32,
+                            16,
+                            0,
+                            Math.PI * 2,
+                            0,
+                            Math.PI / 2,
+                        );
+                        const bottomMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xffffff,
+                            transparent: true,
+                            opacity: 0.25,
+                        });
+                        const bottom = new THREE.Mesh(
+                            bottomGeometry,
+                            bottomMaterial,
+                        );
+                        bottom.position.y = -0.5 * tubeHeight;
+                        bottom.rotation.x = Math.PI;
+                        group.add(bottom);
+
+                        // Realistic carrot extract (liquid sits at bottom, meniscus)
+                        const liquidHeight = 1.2;
+                        // Main liquid body
+                        const liquidGeometry = new THREE.CylinderGeometry(
+                            0.28,
+                            0.28,
+                            liquidHeight,
+                            32,
+                        );
+                        const liquidMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xff8c00,
+                            transparent: true,
+                            opacity: 0.8,
+                        });
+                        const liquid = new THREE.Mesh(
+                            liquidGeometry,
+                            liquidMaterial,
+                        );
+                        // Position so bottom aligns with tube bottom
+                        liquid.position.y =
+                            -0.5 * tubeHeight + 0.5 * liquidHeight;
+                        group.add(liquid);
+                        // Store reference for color animation
+                        group.userData.liquid = liquid;
+
+                        break;
+                    case "wheat":
+                        // Petri dish for wheat flour paste
+                        // Petri dish (shallow transparent cylinder)
+                        const wheatDishRadius = 1.1;
+                        const wheatDishHeight = 0.18;
+                        const wheatDishGeometry = new THREE.CylinderGeometry(
+                            wheatDishRadius,
+                            wheatDishRadius,
+                            wheatDishHeight,
+                            32,
+                        );
+                        const wheatDishMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xffffff,
+                            transparent: true,
+                            opacity: 0.35,
+                        });
+                        const wheatDish = new THREE.Mesh(
+                            wheatDishGeometry,
+                            wheatDishMaterial,
+                        );
+                        wheatDish.position.y = -0.1;
+                        group.add(wheatDish);
+
+                        // Wheat flour paste (beige, slightly domed)
+                        const wheatPasteHeight = 0.12;
+                        const wheatPasteGeometry = new THREE.CylinderGeometry(
+                            1.0,
+                            1.0,
+                            wheatPasteHeight,
+                            32,
+                        );
+                        const wheatPasteMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xd2b48c,
+                            transparent: true,
+                            opacity: 0.95,
+                        });
+                        const wheatPaste = new THREE.Mesh(
+                            wheatPasteGeometry,
+                            wheatPasteMaterial,
+                        );
+                        wheatPaste.position.y = -0.1 + 0.5 * wheatPasteHeight;
+                        group.add(wheatPaste);
+                        // Store reference for color animation
+                        group.userData.paste = wheatPaste;
+                        break;
+                    case "apple":
+                        // Realistic test tube assembly for apple extract
+                        const appleTubeHeight = 2;
+                        const appleTubeRadius = 0.3;
+
+                        // Main body (transparent cylinder)
+                        const appleTubeBodyGeometry =
+                            new THREE.CylinderGeometry(
+                                appleTubeRadius,
+                                appleTubeRadius,
+                                appleTubeHeight,
+                                32,
+                            );
+                        const appleTubeBodyMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xffffff,
+                                transparent: true,
+                                opacity: 0.25,
+                            });
+                        const appleTubeBody = new THREE.Mesh(
+                            appleTubeBodyGeometry,
+                            appleTubeBodyMaterial,
+                        );
+                        appleTubeBody.position.y = 0.5;
+                        group.add(appleTubeBody);
+
+                        // Rounded bottom (hemisphere)
+                        const appleBottomGeometry = new THREE.SphereGeometry(
+                            appleTubeRadius,
+                            32,
+                            16,
+                            0,
+                            Math.PI * 2,
+                            0,
+                            Math.PI / 2,
+                        );
+                        const appleBottomMaterial = new THREE.MeshPhongMaterial(
+                            {
+                                color: 0xffffff,
+                                transparent: true,
+                                opacity: 0.25,
+                            },
+                        );
+                        const appleBottom = new THREE.Mesh(
+                            appleBottomGeometry,
+                            appleBottomMaterial,
+                        );
+                        appleBottom.position.y = -0.5 * appleTubeHeight;
+                        appleBottom.rotation.x = Math.PI;
+                        group.add(appleBottom);
+
+                        // Apple extract (liquid sits at bottom)
+                        const appleLiquidHeight = 1.2;
+                        const appleLiquidGeometry = new THREE.CylinderGeometry(
+                            0.28,
+                            0.28,
+                            appleLiquidHeight,
+                            32,
+                        );
+                        const appleLiquidMaterial = new THREE.MeshPhongMaterial(
+                            {
+                                color: 0xfff176, // yellowish (light apple juice)
+                                transparent: true,
+                                opacity: 0.8,
+                            },
+                        );
+                        const appleLiquid = new THREE.Mesh(
+                            appleLiquidGeometry,
+                            appleLiquidMaterial,
+                        );
+                        // Position so bottom aligns with tube bottom
+                        appleLiquid.position.y =
+                            -0.5 * appleTubeHeight + 0.5 * appleLiquidHeight;
+                        group.add(appleLiquid);
+                        // Store reference for color animation
+                        group.userData.liquid = appleLiquid;
+
+                        break;
+                    case "egg":
+                        // Petri dish for egg white
+                        const eggDishRadius = 1.1;
+                        const eggDishHeight = 0.18;
+                        const eggDishGeometry = new THREE.CylinderGeometry(
+                            eggDishRadius,
+                            eggDishRadius,
+                            eggDishHeight,
+                            32,
+                        );
+                        const eggDishMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xffffff,
+                            transparent: true,
+                            opacity: 0.35,
+                        });
+                        const eggDish = new THREE.Mesh(
+                            eggDishGeometry,
+                            eggDishMaterial,
+                        );
+                        eggDish.position.y = -0.1;
+                        group.add(eggDish);
+
+                        // Egg white "puddle" (outer, thin, bluish-white)
+                        const eggWhiteOuterGeometry =
+                            new THREE.CylinderGeometry(1.0, 1.0, 0.05, 32);
+                        const eggWhiteOuterMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xe0f7fa, // bluish-white
+                                transparent: true,
+                                opacity: 0.6,
+                                shininess: 80,
+                            });
+                        const eggWhiteOuter = new THREE.Mesh(
+                            eggWhiteOuterGeometry,
+                            eggWhiteOuterMaterial,
+                        );
+                        eggWhiteOuter.position.y = -0.1 + 0.025;
+                        group.add(eggWhiteOuter);
+
+                        // Egg white "center" (thicker, more opaque)
+                        const eggWhiteCenterGeometry =
+                            new THREE.CylinderGeometry(0.5, 0.5, 0.09, 32);
+                        const eggWhiteCenterMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xfafafa,
+                                transparent: true,
+                                opacity: 0.85,
+                                shininess: 100,
+                            });
+                        const eggWhiteCenter = new THREE.Mesh(
+                            eggWhiteCenterGeometry,
+                            eggWhiteCenterMaterial,
+                        );
+                        eggWhiteCenter.position.y = -0.1 + 0.045;
+                        group.add(eggWhiteCenter);
+
+                        // Store reference for color animation (center part)
+                        group.userData.paste = eggWhiteCenter;
+                        break;
+                    case "tomato":
+                        // Realistic test tube assembly for tomato extract
+                        const tomatoTubeHeight = 2;
+                        const tomatoTubeRadius = 0.3;
+
+                        // Main body (transparent cylinder)
+                        const tomatoTubeBodyGeometry =
+                            new THREE.CylinderGeometry(
+                                tomatoTubeRadius,
+                                tomatoTubeRadius,
+                                tomatoTubeHeight,
+                                32,
+                            );
+                        const tomatoTubeBodyMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xffffff,
+                                transparent: true,
+                                opacity: 0.25,
+                            });
+                        const tomatoTubeBody = new THREE.Mesh(
+                            tomatoTubeBodyGeometry,
+                            tomatoTubeBodyMaterial,
+                        );
+                        tomatoTubeBody.position.y = 0.5;
+                        group.add(tomatoTubeBody);
+
+                        // Rounded bottom (hemisphere)
+                        const tomatoBottomGeometry = new THREE.SphereGeometry(
+                            tomatoTubeRadius,
+                            32,
+                            16,
+                            0,
+                            Math.PI * 2,
+                            0,
+                            Math.PI / 2,
+                        );
+                        const tomatoBottomMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xffffff,
+                                transparent: true,
+                                opacity: 0.25,
+                            });
+                        const tomatoBottom = new THREE.Mesh(
+                            tomatoBottomGeometry,
+                            tomatoBottomMaterial,
+                        );
+                        tomatoBottom.position.y = -0.5 * tomatoTubeHeight;
+                        tomatoBottom.rotation.x = Math.PI;
+                        group.add(tomatoBottom);
+
+                        // Tomato extract (liquid sits at bottom)
+                        const tomatoLiquidHeight = 1.2;
+                        const tomatoLiquidGeometry = new THREE.CylinderGeometry(
+                            0.28,
+                            0.28,
+                            tomatoLiquidHeight,
+                            32,
+                        );
+                        const tomatoLiquidMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xff6347, // reddish (tomato juice)
+                                transparent: true,
+                                opacity: 0.8,
+                            });
+                        const tomatoLiquid = new THREE.Mesh(
+                            tomatoLiquidGeometry,
+                            tomatoLiquidMaterial,
+                        );
+                        // Position so bottom aligns with tube bottom
+                        tomatoLiquid.position.y =
+                            -0.5 * tomatoTubeHeight + 0.5 * tomatoLiquidHeight;
+                        group.add(tomatoLiquid);
+                        // Store reference for color animation
+                        group.userData.liquid = tomatoLiquid;
+
+                        break;
+                    case "oats":
+                        // Petri dish for oat flour paste
+                        const oatsDishRadius = 1.1;
+                        const oatsDishHeight = 0.18;
+                        const oatsDishGeometry = new THREE.CylinderGeometry(
+                            oatsDishRadius,
+                            oatsDishRadius,
+                            oatsDishHeight,
+                            32,
+                        );
+                        const oatsDishMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xffffff,
+                            transparent: true,
+                            opacity: 0.35,
+                        });
+                        const oatsDish = new THREE.Mesh(
+                            oatsDishGeometry,
+                            oatsDishMaterial,
+                        );
+                        oatsDish.position.y = -0.1;
+                        group.add(oatsDish);
+
+                        // Oat flour paste (beige/white, slightly domed)
+                        const oatsPasteHeight = 0.12;
+                        const oatsPasteGeometry = new THREE.CylinderGeometry(
+                            1.0,
+                            1.0,
+                            oatsPasteHeight,
+                            32,
+                        );
+                        const oatsPasteMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xf5f5dc,
+                            transparent: true,
+                            opacity: 0.95,
+                        });
+                        const oatsPaste = new THREE.Mesh(
+                            oatsPasteGeometry,
+                            oatsPasteMaterial,
+                        );
+                        oatsPaste.position.y = -0.1 + 0.5 * oatsPasteHeight;
+                        group.add(oatsPaste);
+                        // Store reference for color animation
+                        group.userData.paste = oatsPaste;
+                        break;
+                    case "potato":
+                        // Realistic test tube assembly for potato extract
+                        const potatoTubeHeight = 2;
+                        const potatoTubeRadius = 0.3;
+
+                        // Main body (transparent cylinder)
+                        const potatoTubeBodyGeometry =
+                            new THREE.CylinderGeometry(
+                                potatoTubeRadius,
+                                potatoTubeRadius,
+                                potatoTubeHeight,
+                                32,
+                            );
+                        const potatoTubeBodyMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xffffff,
+                                transparent: true,
+                                opacity: 0.25,
+                            });
+                        const potatoTubeBody = new THREE.Mesh(
+                            potatoTubeBodyGeometry,
+                            potatoTubeBodyMaterial,
+                        );
+                        potatoTubeBody.position.y = 0.5;
+                        group.add(potatoTubeBody);
+
+                        // Rounded bottom (hemisphere)
+                        const potatoBottomGeometry = new THREE.SphereGeometry(
+                            potatoTubeRadius,
+                            32,
+                            16,
+                            0,
+                            Math.PI * 2,
+                            0,
+                            Math.PI / 2,
+                        );
+                        const potatoBottomMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xffffff,
+                                transparent: true,
+                                opacity: 0.25,
+                            });
+                        const potatoBottom = new THREE.Mesh(
+                            potatoBottomGeometry,
+                            potatoBottomMaterial,
+                        );
+                        potatoBottom.position.y = -0.5 * potatoTubeHeight;
+                        potatoBottom.rotation.x = Math.PI;
+                        group.add(potatoBottom);
+
+                        // Potato extract (cloudy/white liquid sits at bottom)
+                        const potatoLiquidHeight = 1.2;
+                        const potatoLiquidGeometry = new THREE.CylinderGeometry(
+                            0.28,
+                            0.28,
+                            potatoLiquidHeight,
+                            32,
+                        );
+                        const potatoLiquidMaterial =
+                            new THREE.MeshPhongMaterial({
+                                color: 0xf5f5f5, // cloudy/white
+                                transparent: true,
+                                opacity: 0.8,
+                            });
+                        const potatoLiquid = new THREE.Mesh(
+                            potatoLiquidGeometry,
+                            potatoLiquidMaterial,
+                        );
+                        // Position so bottom aligns with tube bottom
+                        potatoLiquid.position.y =
+                            -0.5 * potatoTubeHeight + 0.5 * potatoLiquidHeight;
+                        group.add(potatoLiquid);
+                        // Store reference for color animation
+                        group.userData.liquid = potatoLiquid;
+
+                        break;
+                    case "bread":
+                        // Petri dish for bread cubes
+                        const breadDishRadius = 1.1;
+                        const breadDishHeight = 0.18;
+                        const breadDishGeometry = new THREE.CylinderGeometry(
+                            breadDishRadius,
+                            breadDishRadius,
+                            breadDishHeight,
+                            32,
+                        );
+                        const breadDishMaterial = new THREE.MeshPhongMaterial({
+                            color: 0xffffff,
+                            transparent: true,
+                            opacity: 0.35,
+                        });
+                        const breadDish = new THREE.Mesh(
+                            breadDishGeometry,
+                            breadDishMaterial,
+                        );
+                        breadDish.position.y = -0.1;
+                        group.add(breadDish);
+
+                        // Bread cubes (several small cubes in the dish)
+                        const breadCubes = [];
+                        const breadCubeColors = [0xd2b48c, 0xf5deb3, 0xc2b280];
+                        for (let i = 0; i < 5; i++) {
+                            const cubeSize = 0.32 + 0.06 * Math.random();
+                            const cubeGeometry = new THREE.BoxGeometry(
+                                cubeSize,
+                                cubeSize,
+                                cubeSize,
+                            );
+                            const cubeMaterial = new THREE.MeshPhongMaterial({
+                                color: breadCubeColors[
+                                    i % breadCubeColors.length
+                                ],
+                                transparent: true,
+                                opacity: 0.95,
+                            });
+                            const cube = new THREE.Mesh(
+                                cubeGeometry,
+                                cubeMaterial,
+                            );
+                            // Randomly position cubes within the dish
+                            const angle = Math.random() * Math.PI * 2;
+                            const radius = 0.5 + Math.random() * 0.35;
+                            cube.position.x = Math.cos(angle) * radius;
+                            cube.position.z = Math.sin(angle) * radius;
+                            cube.position.y = -0.1 + 0.5 * cubeSize;
+                            group.add(cube);
+                            breadCubes.push(cube);
+                        }
+                        // Store reference for color animation
+                        group.userData.breadCubes = breadCubes;
+                        break;
+                }
+
+                const foodMesh = new THREE.Mesh(geometry, material);
+                foodMesh.castShadow = true;
+                foodMesh.receiveShadow = true;
+                group.add(foodMesh);
+
+                // Only add a plate for wheat, oats, egg, and bread (not test tube samples)
+                if (
+                    foodType === "wheat" ||
+                    foodType === "oats" ||
+                    foodType === "egg" ||
+                    foodType === "bread"
+                ) {
+                    const plateGeometry = new THREE.CylinderGeometry(
+                        1.5,
+                        1.5,
+                        0.2,
+                        32,
+                    );
+                    const plateMaterial = new THREE.MeshPhongMaterial({
+                        color: 0xffffff,
+                    });
+                    const plate = new THREE.Mesh(plateGeometry, plateMaterial);
+                    plate.position.y = -1;
+                    plate.receiveShadow = true;
+                    group.add(plate);
+                }
+
+                group.position.set(0, -1, 0);
+                scene.add(group);
+                foodSample = group;
+                selectedFood = foodType;
+            }
+
+            // Create iodine drop
+            function createIodineDrop(x, y, z) {
+                const geometry = new THREE.SphereGeometry(0.15, 32, 32);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0x4b0082,
+                    transparent: true,
+                    opacity: 0.8,
+                });
+
+                const drop = new THREE.Mesh(geometry, material);
+                drop.position.set(x, y, z);
+                drop.castShadow = true;
+                scene.add(drop);
+
+                // Animate the drop falling
+                gsap.to(drop.position, {
+                    y: -1.5,
+                    duration: 0.5,
+                    ease: "power1.in",
+                    onComplete: () => {
+                        // Show reaction after drop hits
+                        showReaction(x, z);
+                    },
+                });
+
+                iodineDrops.push(drop);
+            }
+
+            // Show chemical reaction
+            function showReaction(x, z) {
+                if (!selectedFood) return;
+
+                const foodData = foodStarchData[selectedFood];
+                const reactionColor = foodData.positive ? 0x0000ff : 0x8b4513;
+
+                // Determine if this is a test tube sample
+                const testTubeSamples = ["carrot", "apple", "tomato", "potato"];
+                if (testTubeSamples.includes(selectedFood)) {
+                    // Animate the color of the liquid in the test tube
+                    if (
+                        foodSample &&
+                        foodSample.userData &&
+                        foodSample.userData.liquid
+                    ) {
+                        const liquid = foodSample.userData.liquid;
+                        gsap.to(liquid.material.color, {
+                            r: ((reactionColor >> 16) & 0xff) / 255,
+                            g: ((reactionColor >> 8) & 0xff) / 255,
+                            b: (reactionColor & 0xff) / 255,
+                            duration: 1.5,
+                        });
+                    }
+                } else {
+                    // For plate samples, animate the paste color or bread cubes if available, otherwise fallback to disc
+                    if (
+                        foodSample &&
+                        foodSample.userData &&
+                        (foodSample.userData.paste ||
+                            foodSample.userData.breadCubes)
+                    ) {
+                        if (foodSample.userData.paste) {
+                            const paste = foodSample.userData.paste;
+                            gsap.to(paste.material.color, {
+                                r: ((reactionColor >> 16) & 0xff) / 255,
+                                g: ((reactionColor >> 8) & 0xff) / 255,
+                                b: (reactionColor & 0xff) / 255,
+                                duration: 1.5,
+                            });
+                        } else if (foodSample.userData.breadCubes) {
+                            // Animate all bread cubes to reaction color
+                            foodSample.userData.breadCubes.forEach((cube) => {
+                                gsap.to(cube.material.color, {
+                                    r: ((reactionColor >> 16) & 0xff) / 255,
+                                    g: ((reactionColor >> 8) & 0xff) / 255,
+                                    b: (reactionColor & 0xff) / 255,
+                                    duration: 1.5,
+                                });
+                            });
+                        }
+                    } else {
+                        // Fallback: Create reaction spot (disc)
+                        const geometry = new THREE.CircleGeometry(0.5, 32);
+                        const material = new THREE.MeshPhongMaterial({
+                            color: reactionColor,
+                            transparent: true,
+                            opacity: 0.8,
+                        });
+
+                        const reaction = new THREE.Mesh(geometry, material);
+                        reaction.rotation.x = -Math.PI / 2;
+                        reaction.position.set(x, -1.49, z);
+                        scene.add(reaction);
+
+                        // Animate the reaction appearance
+                        gsap.from(reaction.scale, {
+                            x: 0,
+                            y: 0,
+                            z: 0,
+                            duration: 1,
+                            ease: "elastic.out(1, 0.3)",
+                        });
+                    }
+                }
+
+                // Show reaction info
+                const infoPanel = document.querySelector(".reaction-info");
+                infoPanel.style.display = "block";
+
+                document.querySelector(".sample-name span").textContent =
+                    selectedFood.charAt(0).toUpperCase() +
+                    selectedFood.slice(1);
+                document.querySelector(".starch-content span").textContent =
+                    foodData.starch;
+                document.querySelector(".reaction-desc span").textContent =
+                    foodData.reaction;
+
+                if (foodData.positive) {
+                    document.querySelector(".starch-content span").className =
+                        "starch-positive";
+                } else {
+                    document.querySelector(".starch-content span").className =
+                        "starch-negative";
+                }
+            }
+
+            // Setup event listeners
+            function setupEventListeners() {
+                // Food selection
+                document.querySelectorAll(".food-item").forEach((item) => {
+                    item.addEventListener("click", () => {
+                        document
+                            .querySelectorAll(".food-item")
+                            .forEach((i) => i.classList.remove("selected"));
+                        item.classList.add("selected");
+
+                        const foodType = item.getAttribute("data-food");
+                        createFoodSample(foodType);
+
+                        // Hide previous reaction info
+                        document.querySelector(".reaction-info").style.display =
+                            "none";
+
+                        // Remove any existing iodine drops
+                        iodineDrops.forEach((drop) => scene.remove(drop));
+                        iodineDrops = [];
+                    });
+                });
+
+                // Reset button
+                document
+                    .querySelector(".reset-btn")
+                    .addEventListener("click", () => {
+                        createFoodSample(selectedFood || "potato");
+                        document.querySelector(".reaction-info").style.display =
+                            "none";
+
+                        // Remove any existing iodine drops
+                        iodineDrops.forEach((drop) => scene.remove(drop));
+                        iodineDrops = [];
+                    });
+
+                // Add iodine button
+                document
+                    .querySelector(".add-iodine-btn")
+                    .addEventListener("click", () => {
+                        animateDropperToSampleAndDrop();
+                    });
+
+                // Disable drag-and-drop for dropper (remove event listeners)
+                // renderer.domElement.removeEventListener('mousedown', onMouseDown);
+                // renderer.domElement.removeEventListener('mousemove', onMouseMove);
+                // renderer.domElement.removeEventListener('mouseup', onMouseUp);
+            }
+
+            // Mouse event handlers for dragging
+            function onMouseDown(event) {
+                if (event.button === 0) {
+                    // Left click
+                    // Simple check if user is clicking near the dropper
+                    const dropperPosition = new THREE.Vector3();
+                    dropper.getWorldPosition(dropperPosition);
+
+                    const vector = new THREE.Vector2(
+                        (event.clientX / window.innerWidth) * 2 - 1,
+                        -(event.clientY / window.innerHeight) * 2 + 1,
+                    );
+
+                    const raycaster = new THREE.Raycaster();
+                    raycaster.setFromCamera(vector, camera);
+
+                    const intersects = raycaster.intersectObject(dropper, true);
+
+                    if (intersects.length > 0) {
+                        isDragging = true;
+                        controls.enabled = false;
+                    }
+                }
+            }
+
+            function onMouseMove(event) {
+                if (!isDragging) return;
+
+                const vector = new THREE.Vector2(
+                    (event.clientX / window.innerWidth) * 2 - 1,
+                    -(event.clientY / window.innerHeight) * 2 + 1,
+                );
+
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(vector, camera);
+
+                // Calculate intersection with the table plane
+                const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1.5);
+                const intersection = new THREE.Vector3();
+                raycaster.ray.intersectPlane(plane, intersection);
+
+                // Move dropper to the intersection point with constraints
+                if (intersection) {
+                    dropper.position.x = Math.max(
+                        -8,
+                        Math.min(8, intersection.x),
+                    );
+                    dropper.position.z = Math.max(
+                        -4,
+                        Math.min(4, intersection.z),
+                    );
+                }
+            }
+
+            function onMouseUp(event) {
+                if (isDragging && event.button === 0) {
+                    isDragging = false;
+                    controls.enabled = true;
+
+                    // Check if dropper is over the food sample
+                    const foodPosition = new THREE.Vector3();
+                    foodSample.getWorldPosition(foodPosition);
+
+                    const distance = dropper.position.distanceTo(foodPosition);
+
+                    if (distance < 3) {
+                        // Create iodine drop at dropper position
+                        createIodineDrop(
+                            dropper.position.x,
+                            dropper.position.y - 1,
+                            dropper.position.z,
+                        );
+
+                        // Animate dropper squeeze
+                        gsap.to(dropper.children[0].scale, {
+                            y: 0.8,
+                            duration: 0.2,
+                            yoyo: true,
+                            repeat: 1,
+                        });
+                    }
+
+                    // Return dropper to original position
+                    gsap.to(dropper.position, {
+                        x: 6,
+                        z: 0,
+                        duration: 1,
+                        ease: "elastic.out(1, 0.3)",
+                    });
+                }
+            }
+
+            // Handle window resize
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            // Animate dropper to food sample and drop iodine (improved: lift, pause, multiple drops, slow return)
+            function animateDropperToSampleAndDrop() {
+                if (!foodSample || !dropper) return;
+
+                // Get food sample position
+                const foodPosition = new THREE.Vector3();
+                foodSample.getWorldPosition(foodPosition);
+
+                const initialPosition = { x: 6, y: 0, z: 0 };
+                const aboveSample = {
+                    x: foodPosition.x,
+                    y: 3,
+                    z: foodPosition.z,
+                }; // higher y above sample
+                const dropY = 2; // dropper will drop from y=2 (above plate)
+
+                const timeline = gsap.timeline();
+
+                // 1. Move up and above sample (lift high)
+                timeline.to(dropper.position, {
+                    x: aboveSample.x,
+                    z: aboveSample.z,
+                    y: aboveSample.y,
+                    duration: 1,
+                    ease: "power2.inOut",
+                });
+
+                // 2. Pause at the top
+                timeline.to({}, { duration: 0.5 });
+
+                // 3. Lower dropper to drop height (simulate approach)
+                timeline.to(dropper.position, {
+                    y: dropY,
+                    duration: 0.5,
+                    ease: "power1.in",
+                });
+
+                // 4. Pause before dropping
+                timeline.to({}, { duration: 0.3 });
+
+                // 5. Release drops one by one (e.g., 3 drops)
+                const numDrops = 3;
+                for (let i = 0; i < numDrops; i++) {
+                    timeline.call(() => {
+                        createIodineDrop(
+                            dropper.position.x,
+                            dropper.position.y - 1,
+                            dropper.position.z,
+                        );
+                        gsap.to(dropper.children[0].scale, {
+                            y: 0.8,
+                            duration: 0.15,
+                            yoyo: true,
+                            repeat: 1,
+                        });
+                    });
+                    timeline.to({}, { duration: 0.4 }); // pause between drops
+                }
+
+                // 6. Pause after last drop
+                timeline.to({}, { duration: 0.5 });
+
+                // 7. Lift dropper back up a bit before returning
+                timeline.to(dropper.position, {
+                    y: aboveSample.y,
+                    duration: 0.5,
+                    ease: "power1.out",
+                });
+
+                // 8. Slowly crawl back to initial position
+                timeline.to(dropper.position, {
+                    x: initialPosition.x,
+                    z: initialPosition.z,
+                    y: initialPosition.y,
+                    duration: 2.5,
+                    ease: "power1.inOut",
+                });
+            }
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Update controls
+                controls.update();
+
+                // Render scene
+                renderer.render(scene, camera);
+            }
+
+            // Initialize the application
+            init();
+        </script>
+    </body>
+</html>

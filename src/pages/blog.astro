@@ -1,0 +1,113 @@
+---
+import LayoutStacked from '../layouts/LayoutStacked.astro';
+import BlogCard from '../components/BlogCard.astro';
+import CallToAction from '../components/CallToAction.astro';
+import { ghostClient } from '../lib/ghost';
+import Hero from '../components/Hero.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await ghostClient.posts
+    .browse({
+      limit: 'all',
+      fields: 'id,slug',
+    })
+    .catch((err: unknown) => {
+      console.error('Error fetching posts:', err);
+      return [];
+    });
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+  }));
+}
+
+const limit = 6;
+const page = Number(Astro.url.searchParams.get('page')) || 1;
+
+const posts = await ghostClient.posts
+  .browse({ limit, page })
+  .catch((err: unknown) => {
+    console.error('Error fetching posts:', err);
+    return [];
+  });
+
+// Calculate prev/next page numbers
+const prevPage = page > 1 ? page - 1 : null;
+const nextPage = posts.length === limit ? page + 1 : null;
+// const { posts, pagination } = await fetchBlogArticles(5, Number(slug));
+---
+
+<LayoutStacked>
+  <Hero
+    id="blog-hero"
+    title="Welcome to Our Blog"
+    subtitle="Explore the latest articles and insights from our team."
+    buttonLabel="Read More"
+    buttonHref="//blog.sredsol.com"
+    target='_blank'
+    rel="noopener noreferrer"
+    secondaryButtonLabel="Subscribe"
+    secondaryButtonHref="#"
+    animationSrc="/animations/hero-blog.lottie"
+    bgColor="bg-blue-100 dark:bg-blue-900"
+    className="py-16"
+  />
+  <section class="container mx-auto px-6 lg:px-20 py-16">
+    <!-- <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white text-center mb-12">
+      Latest Blog Articles
+    </h1> -->
+
+    <!-- Blog Articles -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {posts?.length > 0 ? (
+        posts.map((post: any) => (
+          <BlogCard
+            id={post.id}
+            imageSrc={post.feature_image || '/assets/default-image.jpg'}
+            title={post.title}
+            description={post.excerpt}
+             slug={post.slug}
+          />
+        ))
+      ) : (
+        <p class="text-center col-span-full">No posts available.</p>
+      )}
+    </div>
+
+
+
+    <!-- Pagination Controls -->
+    <section class="flex justify-center mt-8">
+      {prevPage && (
+        <a
+          href={`/blog?page=${prevPage}`}
+          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg mr-2"
+        >
+          Previous
+        </a>
+      )}
+      {nextPage && (
+        <a
+          href={`/blog?page=${nextPage}`}
+          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
+        >
+          Next
+        </a>
+      )}
+    </section>
+    <!-- Call to Action -->
+    <CallToAction
+      title="Subscribe to Our Newsletter"
+      description="Stay updated with the latest blog posts and news. Subscribe to our newsletter today!"
+      buttonLabel="Subscribe Now"
+      buttonHref="/subscribe"
+    />
+  </section>
+</LayoutStacked>
+
+<script is:inline
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>

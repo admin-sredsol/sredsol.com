@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Metal Heat Conduction Simulation</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden;
+                background: linear-gradient(to bottom, #1a2a6c, #2c3e50);
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                color: #f7f7f7;
+                font-size: 18px;
+            }
+            #container {
+                position: relative;
+                width: 100vw;
+                height: 100vh;
+            }
+            #canvas {
+                display: block;
+                cursor: pointer;
+            }
+            #ui {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                background: rgba(20, 20, 30, 0.92);
+                padding: 20px;
+                border-radius: 10px;
+                max-width: 340px;
+                min-width: 220px;
+                backdrop-filter: blur(5px);
+                border: 2px solid #ffb300;
+                transition: left 0.3s;
+                z-index: 10;
+            }
+            #ui.collapsed {
+                left: -260px;
+            }
+            #ui-toggle {
+                position: absolute;
+                top: 10px;
+                right: -38px;
+                width: 36px;
+                height: 36px;
+                background: linear-gradient(to right, #ff9a00, #ff5e62);
+                border-radius: 50%;
+                border: none;
+                color: #fff;
+                font-size: 1.5rem;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+                z-index: 11;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: right 0.3s;
+            }
+            #ui-toggle:focus {
+                outline: 2px solid #ff9a00;
+            }
+            h1 {
+                margin-top: 0;
+                color: #ffb300;
+                font-size: 2.1rem;
+                text-shadow: 0 0 5px rgba(255, 179, 0, 0.5);
+            }
+            .control-group {
+                margin-bottom: 15px;
+            }
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+            select,
+            button {
+                width: 100%;
+                padding: 12px;
+                border-radius: 5px;
+                border: none;
+                background: #2c3e50;
+                color: #f7f7f7;
+                font-size: 18px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            button {
+                background: linear-gradient(to right, #ffb300, #43a047);
+                font-weight: bold;
+                margin-top: 10px;
+                padding: 12px;
+                border: 2px solid #ffb300;
+            }
+            button:hover,
+            button:focus {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                outline: 2px solid #43a047;
+            }
+            #info-panel {
+                position: absolute;
+                top: 18px;
+                left: 55%;
+                transform: translateX(-50%);
+                background: rgba(20, 20, 30, 0.92);
+                padding: 7px 22px 7px 18px;
+                border-radius: 8px;
+                max-width: 700px;
+                min-width: 220px;
+                font-size: 15px;
+                line-height: 1.4;
+                backdrop-filter: blur(5px);
+                border: 2px solid #43a047;
+                z-index: 20;
+                display: flex;
+                align-items: center;
+                gap: 18px;
+                box-shadow: 0 2px 12px #0003;
+            }
+
+            @media (max-width: 700px) {
+                #info-panel {
+                    top: 70px;
+                    left: 10px;
+                    right: 10px;
+                    transform: none;
+                    max-width: none;
+                    min-width: 0;
+                    font-size: 13px;
+                    padding: 6px 10px 6px 10px;
+                    gap: 8px;
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                #info-panel h3 {
+                    margin: 0 0 4px 0;
+                    font-size: 1em;
+                }
+                #info-panel ol {
+                    flex-direction: column;
+                    gap: 2px;
+                    padding-left: 18px;
+                }
+                #info-panel ol li {
+                    font-size: 0.98em;
+                    margin: 0 0 0 0;
+                }
+            }
+            #info-panel h3 {
+                margin: 0 12px 0 0;
+                font-size: 1.08em;
+                color: #43a047;
+                letter-spacing: 0.5px;
+                font-weight: 600;
+            }
+            #info-panel ol {
+                margin: 0;
+                padding: 0 0 0 18px;
+                display: flex;
+                gap: 18px;
+                list-style: decimal inside;
+            }
+            #info-panel ol li {
+                font-size: 1em;
+                margin: 0 8px 0 0;
+                padding: 0;
+                display: inline;
+                color: #ffb300;
+                font-weight: 500;
+            }
+            #info-panel .observation {
+                display: none;
+            }
+            .observation-bar {
+                position: fixed;
+                left: 50%;
+                bottom: 0;
+                transform: translateX(-50%);
+                min-width: 260px;
+                max-width: 600px;
+                background: rgba(255, 179, 0, 0.92);
+                color: #222;
+                font-size: 1.08em;
+                font-weight: 500;
+                border-radius: 12px 12px 0 0;
+                border: 2px solid #43a047;
+                border-bottom: none;
+                box-shadow: 0 -2px 18px #0005;
+                padding: 14px 28px 14px 18px;
+                margin: 0;
+                z-index: 50;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                transition:
+                    box-shadow 0.4s,
+                    background 0.4s;
+            }
+            .observation-bar.animated {
+                box-shadow: 0 0 28px 8px #43a047aa;
+                background: rgba(255, 179, 0, 0.98);
+            }
+            .tooltip {
+                position: absolute;
+                pointer-events: none;
+                background: rgba(30, 30, 40, 0.97);
+                color: #fff;
+                font-size: 15px;
+                padding: 7px 13px;
+                border-radius: 6px;
+                border: 1px solid #ff9a00;
+                z-index: 100;
+                white-space: nowrap;
+                box-shadow: 0 2px 10px #0007;
+                opacity: 0;
+                transition: opacity 0.18s;
+            }
+            .tooltip.visible {
+                opacity: 1;
+            }
+            .legend {
+                display: flex;
+                margin-top: 10px;
+                gap: 10px;
+            }
+            .legend-icon {
+                width: 22px;
+                height: 22px;
+                margin-right: 6px;
+                vertical-align: middle;
+                outline: none;
+            }
+            .conductor {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                margin-bottom: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="canvas"></canvas>
+            <div id="ui">
+                <div id="tooltip" class="tooltip"></div>
+                <button
+                    id="ui-toggle"
+                    aria-label="Toggle UI"
+                    title="Toggle UI"
+                    tabindex="0"
+                >
+                    &#9776;
+                </button>
+                <h1>Heat Conduction Simulation</h1>
+                <div class="control-group">
+                    <label for="metalType">Select Metal:</label>
+                    <select id="metalType" aria-label="Select Metal">
+                        <option value="copper">Copper (Good Conductor)</option>
+                        <option value="aluminum">
+                            Aluminum (Good Conductor)
+                        </option>
+                        <option value="iron">Iron (Moderate Conductor)</option>
+                        <option value="lead">Lead (Poor Conductor)</option>
+                    </select>
+                </div>
+                <button id="startBtn">Start Experiment</button>
+                <button id="resetBtn">Reset Experiment</button>
+
+                <div class="legend" aria-label="Legend">
+                    <div class="conductor">
+                        <svg
+                            class="legend-icon"
+                            viewBox="0 0 32 32"
+                            aria-hidden="true"
+                        >
+                            <ellipse
+                                cx="16"
+                                cy="16"
+                                rx="14"
+                                ry="10"
+                                fill="#ffb300"
+                                stroke="#388e3c"
+                                stroke-width="2"
+                            />
+                        </svg>
+                        <span>Heated Area</span>
+                    </div>
+                    <div class="conductor">
+                        <svg
+                            class="legend-icon"
+                            viewBox="0 0 32 32"
+                            aria-hidden="true"
+                        >
+                            <rect
+                                x="4"
+                                y="10"
+                                width="24"
+                                height="12"
+                                rx="3"
+                                fill="#388e3c"
+                                stroke="#7a4926"
+                                stroke-width="2"
+                            />
+                        </svg>
+                        <span>Metal Strip</span>
+                    </div>
+                    <div class="conductor">
+                        <svg
+                            class="legend-icon"
+                            viewBox="0 0 32 32"
+                            aria-hidden="true"
+                        >
+                            <circle
+                                cx="16"
+                                cy="16"
+                                r="10"
+                                fill="#fff"
+                                stroke="#757575"
+                                stroke-width="2"
+                            />
+                        </svg>
+                        <span>Wax</span>
+                    </div>
+                    <div class="conductor">
+                        <svg
+                            class="legend-icon"
+                            viewBox="0 0 32 32"
+                            aria-hidden="true"
+                        >
+                            <rect
+                                x="12"
+                                y="6"
+                                width="8"
+                                height="20"
+                                rx="2"
+                                fill="#e0e0e0"
+                                stroke="#388e3c"
+                                stroke-width="2"
+                            />
+                        </svg>
+                        <span>Pin</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="info-panel">
+                <h3>Experiment Steps:</h3>
+                <ol>
+                    <li>Clamp metal strip on stand</li>
+                    <li>Fix pin to free end with wax</li>
+                    <li>Heat near clamped area</li>
+                    <li>Observe pin falling as wax melts</li>
+                </ol>
+            </div>
+        </div>
+        <div class="observation-bar" id="observation-panel" aria-live="polite">
+            <strong>Observation:</strong>
+            <span id="observation-text" tabindex="0">
+                The pin will fall when heat conducts to the wax attachment
+                point.
+            </span>
+        </div>
+
+        <script>
+            // Main Three.js variables
+            let scene, camera, renderer, container;
+            let metalStrip, stand, burner, flame, pin, pinHead, wax;
+            let heatTween, fallTween;
+            let clock = new THREE.Clock();
+            let heatProgress = 0;
+            let experimentStarted = false;
+            let currentMetal = "copper";
+            let conductivityValues = {
+                copper: 401, // W/(m·K)
+                aluminum: 237,
+                iron: 80,
+                lead: 35,
+            };
+
+            // For hover/tooltip
+            let raycaster = new THREE.Raycaster();
+            let mouse = new THREE.Vector2();
+            let hoveredObject = null;
+            let tooltipDiv = null;
+
+            // UI collapsible logic
+            document.addEventListener("DOMContentLoaded", function () {
+                const ui = document.getElementById("ui");
+                const toggle = document.getElementById("ui-toggle");
+                toggle.addEventListener("click", function () {
+                    ui.classList.toggle("collapsed");
+                    toggle.setAttribute(
+                        "aria-pressed",
+                        ui.classList.contains("collapsed"),
+                    );
+                });
+                toggle.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggle.click();
+                    }
+                });
+            });
+
+            // Initialize the scene
+            function init() {
+                tooltipDiv = document.getElementById("tooltip");
+                container = document.getElementById("canvas");
+                container.addEventListener("mousemove", onCanvasMouseMove);
+                container.addEventListener("mouseleave", () => {
+                    if (tooltipDiv) tooltipDiv.classList.remove("visible");
+                    if (hoveredObject) unhighlightObject(hoveredObject);
+                    hoveredObject = null;
+                });
+                // Create scene
+                scene = new THREE.Scene();
+                // Subtle background gradient using a canvas texture
+                const bgCanvas = document.createElement("canvas");
+                bgCanvas.width = 32;
+                bgCanvas.height = 256;
+                const ctx = bgCanvas.getContext("2d");
+                const grad = ctx.createLinearGradient(0, 0, 0, 256);
+                grad.addColorStop(0, "#232b4a");
+                grad.addColorStop(1, "#3e4a6d");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 32, 256);
+                const bgTexture = new THREE.CanvasTexture(bgCanvas);
+                scene.background = bgTexture;
+                scene.fog = new THREE.Fog(0x232b4a, 20, 50);
+
+                // Create camera
+                camera = new THREE.PerspectiveCamera(
+                    45,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    1000,
+                );
+                camera.position.set(3.5, 5.5, 11);
+                camera.lookAt(2, 4, 0);
+
+                // Create renderer
+                container = document.getElementById("canvas");
+                renderer = new THREE.WebGLRenderer({
+                    antialias: true,
+                    canvas: container,
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                renderer.shadowMap.width = 2048;
+                renderer.shadowMap.height = 2048;
+
+                // Add OrbitControls
+                window.controls = new THREE.OrbitControls(
+                    camera,
+                    renderer.domElement,
+                );
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.08;
+                controls.enablePan = true;
+                controls.minDistance = 5;
+                controls.maxDistance = 30;
+                controls.target.set(0, 2, 0);
+                controls.update();
+
+                // Add lights
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(
+                    0xffffff,
+                    0.8,
+                );
+                directionalLight.position.set(5, 10, 7);
+                directionalLight.castShadow = true;
+                scene.add(directionalLight);
+
+                // Add a warm point light near the Bunsen burner for flame glow
+                const flameLight = new THREE.PointLight(0xffa040, 1.2, 8, 2);
+                flameLight.position.set(0.5, 2.2, 0);
+                flameLight.castShadow = true;
+                flameLight.shadow.mapSize.width = 1024;
+                flameLight.shadow.mapSize.height = 1024;
+                scene.add(flameLight);
+
+                // Add lab environment
+                createLabEnvironment();
+
+                // Create the experiment setup
+                createExperimentSetup();
+
+                // Event listeners
+                window.addEventListener("resize", onWindowResize);
+                document
+                    .getElementById("startBtn")
+                    .addEventListener("click", startExperiment);
+                document
+                    .getElementById("resetBtn")
+                    .addEventListener("click", resetExperiment);
+                document
+                    .getElementById("metalType")
+                    .addEventListener("change", function () {
+                        currentMetal = this.value;
+                        if (!experimentStarted) {
+                            resetExperiment();
+                        }
+                    });
+
+                // Start animation loop
+                animate();
+            }
+
+            // Create the laboratory environment
+            function createLabEnvironment() {
+                // Lab table
+                const tableGeometry = new THREE.BoxGeometry(15, 0.5, 8);
+                const tableMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x4e342e,
+                    roughness: 0.7,
+                    metalness: 0.2,
+                });
+                const table = new THREE.Mesh(tableGeometry, tableMaterial);
+                table.position.set(0, -0.25, 0);
+                table.receiveShadow = true;
+                scene.add(table);
+
+                // Table legs
+                const legGeometry = new THREE.BoxGeometry(0.5, 3, 0.5);
+                for (let i = 0; i < 4; i++) {
+                    const leg = new THREE.Mesh(legGeometry, tableMaterial);
+                    leg.position.set(
+                        i % 2 === 0 ? -7 : 7,
+                        -1.75,
+                        i < 2 ? -3.5 : 3.5,
+                    );
+                    leg.castShadow = true;
+                    scene.add(leg);
+                }
+
+                // Back wall
+                const wallGeometry = new THREE.BoxGeometry(16, 8, 0.1);
+                const wallMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x2c3e50,
+                    roughness: 0.8,
+                });
+                const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+                wall.position.set(0, 3.5, -4);
+                wall.receiveShadow = true;
+                scene.add(wall);
+
+                // Equipment shelf
+                const shelfGeometry = new THREE.BoxGeometry(10, 0.2, 3);
+                const shelfMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x5d4037,
+                    roughness: 0.7,
+                });
+                const shelf = new THREE.Mesh(shelfGeometry, shelfMaterial);
+                shelf.position.set(0, 5, -3.5);
+                shelf.castShadow = true;
+                shelf.receiveShadow = true;
+                scene.add(shelf);
+
+                // Shelf supports
+                const supportGeometry = new THREE.BoxGeometry(0.2, 2, 0.2);
+                for (let i = -1; i <= 1; i += 2) {
+                    for (let j = -1; j <= 1; j += 2) {
+                        const support = new THREE.Mesh(
+                            supportGeometry,
+                            shelfMaterial,
+                        );
+                        support.position.set(i * 4.9, 4, j * 1.4 - 3.5);
+                        scene.add(support);
+                    }
+                }
+
+                // Add some lab equipment
+                createLabEquipment();
+
+                // Add small lab props for realism
+                // Book
+                const bookGeometry = new THREE.BoxGeometry(0.7, 0.08, 0.5);
+                const bookMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x4a90e2,
+                    roughness: 0.5,
+                    metalness: 0.2,
+                });
+                const book = new THREE.Mesh(bookGeometry, bookMaterial);
+                book.position.set(-2.5, 0.28, 2.2);
+                book.rotation.y = 0.18;
+                book.castShadow = true;
+                scene.add(book);
+
+                // Notebook
+                const notebookGeometry = new THREE.BoxGeometry(0.5, 0.04, 0.7);
+                const notebookMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xf5f5f5,
+                    roughness: 0.7,
+                    metalness: 0.1,
+                });
+                const notebook = new THREE.Mesh(
+                    notebookGeometry,
+                    notebookMaterial,
+                );
+                notebook.position.set(2.7, 0.27, -2.3);
+                notebook.rotation.y = -0.25;
+                notebook.castShadow = true;
+                scene.add(notebook);
+
+                // Pen
+                const penGeometry = new THREE.CylinderGeometry(
+                    0.015,
+                    0.015,
+                    0.6,
+                    12,
+                );
+                const penMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x222222,
+                    roughness: 0.4,
+                    metalness: 0.6,
+                });
+                const pen = new THREE.Mesh(penGeometry, penMaterial);
+                pen.position.set(2.9, 0.33, -2.1);
+                pen.rotation.z = Math.PI / 2.2;
+                scene.add(pen);
+            }
+
+            // Create laboratory equipment
+            function createLabEquipment() {
+                // Beaker
+                const beakerGeometry = new THREE.CylinderGeometry(
+                    0.7,
+                    0.8,
+                    1.2,
+                    32,
+                );
+                const beakerMaterial = new THREE.MeshPhysicalMaterial({
+                    color: 0xffffff,
+                    transmission: 0.9,
+                    roughness: 0.1,
+                    thickness: 0.05,
+                    transparent: true,
+                    opacity: 0.7,
+                });
+                const beaker = new THREE.Mesh(beakerGeometry, beakerMaterial);
+                beaker.position.set(4, 0.7, 2);
+                beaker.castShadow = true;
+                scene.add(beaker);
+
+                // Beaker liquid
+                const liquidGeometry = new THREE.CylinderGeometry(
+                    0.65,
+                    0.75,
+                    0.8,
+                    32,
+                );
+                const liquidMaterial = new THREE.MeshPhysicalMaterial({
+                    color: 0x4fc3f7,
+                    transmission: 0.95,
+                    roughness: 0.05,
+                    thickness: 0.1,
+                });
+                const liquid = new THREE.Mesh(liquidGeometry, liquidMaterial);
+                liquid.position.set(4, 0.4, 2);
+                scene.add(liquid);
+
+                // Test tubes
+                const tubeGeometry = new THREE.CylinderGeometry(
+                    0.2,
+                    0.2,
+                    1.5,
+                    32,
+                );
+                for (let i = 0; i < 3; i++) {
+                    const tube = new THREE.Mesh(tubeGeometry, beakerMaterial);
+                    tube.position.set(-4 + i * 0.8, 0.8, 2.5);
+                    tube.castShadow = true;
+                    scene.add(tube);
+
+                    // Different colored liquids
+                    const colors = [0xe57373, 0x81c784, 0x64b5f6];
+                    const tubeLiquidGeometry = new THREE.CylinderGeometry(
+                        0.18,
+                        0.18,
+                        1.0,
+                        32,
+                    );
+                    const tubeLiquid = new THREE.Mesh(
+                        tubeLiquidGeometry,
+                        new THREE.MeshPhysicalMaterial({
+                            color: colors[i],
+                            transmission: 0.95,
+                            roughness: 0.05,
+                            thickness: 0.1,
+                        }),
+                    );
+                    tubeLiquid.position.set(-4 + i * 0.8, 0.5, 2.5);
+                    scene.add(tubeLiquid);
+                }
+
+                // Safety goggles
+                const goggleGeometry = new THREE.TorusGeometry(
+                    0.8,
+                    0.1,
+                    16,
+                    100,
+                );
+                const goggleMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x29b6f6,
+                    roughness: 0.3,
+                    metalness: 0.4,
+                });
+                const goggles = new THREE.Mesh(goggleGeometry, goggleMaterial);
+                goggles.rotation.x = Math.PI / 2;
+                goggles.position.set(-3, 5.5, -3.2);
+                scene.add(goggles);
+
+                // Goggle lenses
+                const lensGeometry = new THREE.CircleGeometry(0.6, 32);
+                const lensMaterial = new THREE.MeshPhysicalMaterial({
+                    color: 0xbbdefb,
+                    transmission: 0.95,
+                    roughness: 0.05,
+                    thickness: 0.1,
+                });
+                for (let i = -1; i <= 1; i += 2) {
+                    const lens = new THREE.Mesh(lensGeometry, lensMaterial);
+                    lens.rotation.x = -Math.PI / 2;
+                    lens.position.set(-3 + i * 0.5, 5.5, -3.2);
+                    scene.add(lens);
+                }
+            }
+
+            // Create the experiment setup
+            function createExperimentSetup() {
+                // Stand base
+                const baseGeometry = new THREE.BoxGeometry(1.5, 0.3, 1.5);
+                const baseMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x555555,
+                    roughness: 0.5,
+                    metalness: 0.5,
+                });
+                const base = new THREE.Mesh(baseGeometry, baseMaterial);
+                base.position.set(0, 0, 0);
+                base.castShadow = true;
+                scene.add(base);
+
+                // Stand rod
+                const rodGeometry = new THREE.CylinderGeometry(0.1, 0.1, 5, 32);
+                const rod = new THREE.Mesh(rodGeometry, baseMaterial);
+                rod.position.set(0, 2.5, 0);
+                rod.castShadow = true;
+                scene.add(rod);
+
+                // Clamp holder
+                const clampHolderGeometry = new THREE.CylinderGeometry(
+                    0.15,
+                    0.15,
+                    1.5,
+                    32,
+                );
+                const clampHolder = new THREE.Mesh(
+                    clampHolderGeometry,
+                    baseMaterial,
+                );
+                clampHolder.position.set(0, 4.5, 0);
+                clampHolder.castShadow = true;
+                scene.add(clampHolder);
+
+                // Clamp
+                const clampGeometry = new THREE.BoxGeometry(0.8, 0.4, 0.4);
+                const clamp = new THREE.Mesh(
+                    clampGeometry,
+                    new THREE.MeshStandardMaterial({
+                        color: 0x777777,
+                        roughness: 0.5,
+                        metalness: 0.5,
+                    }),
+                );
+                clamp.position.set(0.6, 4.5, 0);
+                clamp.castShadow = true;
+                scene.add(clamp);
+
+                // Create the metal strip
+                createMetalStrip();
+
+                // Create bunsen burner
+                createBunsenBurner();
+            }
+
+            // Create the metal strip
+            function createMetalStrip() {
+                const stripLength = 5;
+                const stripWidth = 0.5;
+                const stripThickness = 0.05;
+
+                // Strip geometry
+                const stripGeometry = new THREE.BoxGeometry(
+                    stripLength,
+                    stripThickness,
+                    stripWidth,
+                );
+                // Environment map for metal
+                const envUrls = [
+                    "https://threejs.org/examples/textures/cube/Bridge2/posx.jpg",
+                    "https://threejs.org/examples/textures/cube/Bridge2/negx.jpg",
+                    "https://threejs.org/examples/textures/cube/Bridge2/posy.jpg",
+                    "https://threejs.org/examples/textures/cube/Bridge2/negy.jpg",
+                    "https://threejs.org/examples/textures/cube/Bridge2/posz.jpg",
+                    "https://threejs.org/examples/textures/cube/Bridge2/negz.jpg",
+                ];
+                const envMap = new THREE.CubeTextureLoader().load(envUrls);
+
+                const stripMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xb87333, // Copper color
+                    roughness: 0.18,
+                    metalness: 1.0,
+                    envMap: envMap,
+                    envMapIntensity: 0.7,
+                });
+
+                metalStrip = new THREE.Mesh(stripGeometry, stripMaterial);
+                metalStrip.position.set(2.5, 4.5, 0);
+                metalStrip.rotation.z = -0.05; // Slight angle
+                metalStrip.castShadow = true;
+                scene.add(metalStrip);
+
+                // Create the pin and wax
+                createPinAndWax(envMap);
+            }
+
+            // Create pin and wax
+            function createPinAndWax(envMap) {
+                // Pin shaft
+                const pinGeometry = new THREE.CylinderGeometry(
+                    0.03,
+                    0.03,
+                    1.2,
+                    16,
+                );
+                const pinMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xe0e0e0,
+                    roughness: 0.08,
+                    metalness: 1.0,
+                    envMap: envMap,
+                    envMapIntensity: 1.0,
+                });
+                pin = new THREE.Mesh(pinGeometry, pinMaterial);
+                pin.position.set(5, 4.1, 0);
+                pin.rotation.set(0, 0, Math.PI / 2);
+                pin.castShadow = true;
+                scene.add(pin);
+
+                // Pin head
+                const headGeometry = new THREE.SphereGeometry(0.08, 16, 16);
+                pinHead = new THREE.Mesh(headGeometry, pinMaterial);
+                pinHead.position.set(5.6, 4.1, 0);
+                scene.add(pinHead);
+
+                // Wax blob
+                const waxGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+                const waxMaterial = new THREE.MeshPhysicalMaterial({
+                    color: 0xffffff,
+                    roughness: 0.3,
+                    metalness: 0.2,
+                    transparent: true,
+                    opacity: 0.6,
+                    transmission: 0.85,
+                    thickness: 0.18,
+                    clearcoat: 1.0,
+                    clearcoatRoughness: 0.1,
+                });
+                wax = new THREE.Mesh(waxGeometry, waxMaterial);
+                wax.position.set(4.8, 4.2, 0);
+                scene.add(wax);
+            }
+
+            // Create bunsen burner
+            function createBunsenBurner() {
+                // Burner base
+                const baseGeometry = new THREE.CylinderGeometry(
+                    0.4,
+                    0.6,
+                    0.3,
+                    32,
+                );
+                const baseMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x444444,
+                    roughness: 0.6,
+                    metalness: 0.4,
+                });
+                burner = new THREE.Mesh(baseGeometry, baseMaterial);
+                burner.position.set(0.5, 0.15, 0);
+                burner.userData = {
+                    tooltip: "Bunsen Burner: Provides heat to the metal strip.",
+                };
+                scene.add(burner);
+
+                // Burner stem
+                const stemGeometry = new THREE.CylinderGeometry(
+                    0.15,
+                    0.15,
+                    1.5,
+                    32,
+                );
+                const stem = new THREE.Mesh(stemGeometry, baseMaterial);
+                stem.position.set(0.5, 1.0, 0);
+                scene.add(stem);
+
+                // Burner head
+                const headGeometry = new THREE.CylinderGeometry(
+                    0.2,
+                    0.2,
+                    0.2,
+                    32,
+                );
+                const head = new THREE.Mesh(headGeometry, baseMaterial);
+                head.position.set(0.5, 1.9, 0);
+                scene.add(head);
+
+                // Flame (will be animated later)
+                const flameGeometry = new THREE.ConeGeometry(0.15, 0.8, 32);
+                flameGeometry.translate(0, 0.4, 0);
+                const flameMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xffa040,
+                    transparent: true,
+                    opacity: 0.85,
+                });
+                flame = new THREE.Mesh(flameGeometry, flameMaterial);
+                flame.position.set(0.5, 2.0, 0);
+                flame.visible = false;
+                scene.add(flame);
+
+                // Add a subtle glow sprite for the flame using a base64 PNG
+                const glowTexture = new THREE.TextureLoader().load(
+                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABFUlEQVR4Xu3XwQkAIBAEwZz/6b2bQwQpQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2ymlk/wEYBLETymFQn2y",
+                );
+                const glowMaterial = new THREE.SpriteMaterial({
+                    map: glowTexture,
+                    color: 0xffa040,
+                    transparent: true,
+                    opacity: 0.45,
+                    depthWrite: false,
+                    depthTest: false,
+                    blending: THREE.AdditiveBlending,
+                });
+                flame.glow = new THREE.Sprite(glowMaterial);
+                flame.glow.scale.set(0.7, 0.7, 1);
+                flame.glow.position.set(0, 0.45, 0);
+                flame.add(flame.glow);
+
+                // Heat wave mesh above the heated area of the strip
+                const heatWaveGeometry = new THREE.PlaneGeometry(
+                    1.2,
+                    0.5,
+                    16,
+                    8,
+                );
+                const heatWaveMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xffe082,
+                    transparent: true,
+                    opacity: 0.25,
+                    side: THREE.DoubleSide,
+                    blending: THREE.AdditiveBlending,
+                });
+                flame.heatWave = new THREE.Mesh(
+                    heatWaveGeometry,
+                    heatWaveMaterial,
+                );
+                flame.heatWave.position.set(2.5, 4.8, 0.26);
+                flame.heatWave.rotation.x = -Math.PI / 2.2;
+                flame.heatWave.visible = false;
+                scene.add(flame.heatWave);
+            }
+
+            // Start the experiment
+            function startExperiment() {
+                if (experimentStarted) return;
+                experimentStarted = true;
+
+                // Update observation text
+                document.getElementById("observation-text").textContent =
+                    `Heating ${currentMetal} strip. Heat is conducting along the metal...`;
+
+                // Show flame
+                flame.visible = true;
+                animateFlame();
+
+                // Calculate conduction speed based on metal type
+                const conductivity = conductivityValues[currentMetal];
+                const conductionTime = 8000 - (conductivity / 401) * 5000; // Scale time based on conductivity
+
+                // Create heat conduction animation
+                const heatMaterial = metalStrip.material;
+                const originalColor = heatMaterial.color.clone();
+
+                // Create a tween for the heat effect
+                heatTween = new TWEEN.Tween({ progress: 0 })
+                    .to({ progress: 1 }, conductionTime)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .onUpdate((obj) => {
+                        heatProgress = obj.progress;
+                        // Visual heat effect
+                        const heatColor = new THREE.Color(0xff9a00);
+                        heatMaterial.color.lerpColors(
+                            originalColor,
+                            heatColor,
+                            obj.progress,
+                        );
+
+                        // Update observation text as heat progresses
+                        const progressPercent = Math.floor(obj.progress * 100);
+                        if (progressPercent < 100) {
+                            document.getElementById(
+                                "observation-text",
+                            ).textContent =
+                                `Heat conduction: ${progressPercent}% complete. ${currentMetal} is ${conductivityValues[currentMetal] > 100 ? "a good" : conductivityValues[currentMetal] > 50 ? "a moderate" : "a poor"} conductor.`;
+                        }
+                    })
+                    .onComplete(() => {
+                        // When heat reaches the end, melt the wax and drop the pin
+                        meltWaxAndDropPin();
+                    })
+                    .start();
+            }
+
+            // Melt the wax and drop the pin
+            function meltWaxAndDropPin() {
+                // Update observation text
+                document.getElementById("observation-text").textContent =
+                    `Heat reached the end! Wax is melting and the pin is falling. ${currentMetal} is ${conductivityValues[currentMetal] > 100 ? "a good" : "a poor"} conductor of heat.`;
+
+                // Animate observation panel for emphasis
+                const obsPanel = document.getElementById("observation-panel");
+                obsPanel.classList.add("animated");
+                setTimeout(() => obsPanel.classList.remove("animated"), 1800);
+
+                // Animate wax melting: flatten more, widen, animate color to pale yellow, increase gloss, and lower opacity
+                new TWEEN.Tween(wax.scale)
+                    .to({ x: 1.8, y: 0.18, z: 1.8 }, 1200)
+                    .easing(TWEEN.Easing.Cubic.Out)
+                    .start();
+
+                new TWEEN.Tween(wax.material)
+                    .to({ opacity: 0.22 }, 1200)
+                    .easing(TWEEN.Easing.Cubic.Out)
+                    .start();
+
+                new TWEEN.Tween(wax.material.color)
+                    .to({ r: 1, g: 0.95, b: 0.7 }, 1200) // pale yellow
+                    .easing(TWEEN.Easing.Cubic.Out)
+                    .start();
+
+                // Increase glossiness as it melts
+                wax.material.roughness = 0.12;
+                wax.material.metalness = 0.35;
+
+                // Animate pin falling
+                const pinTargetPos = new THREE.Vector3(5, 2.5, 0);
+                const pinTargetRot = new THREE.Euler(
+                    Math.PI / 2,
+                    0,
+                    Math.PI / 2,
+                );
+
+                fallTween = new TWEEN.Tween(pin.position)
+                    .to(pinTargetPos, 2000)
+                    .easing(TWEEN.Easing.Bounce.Out)
+                    .start();
+
+                new TWEEN.Tween(pin.rotation)
+                    .to(pinTargetRot, 1500)
+                    .easing(TWEEN.Easing.Cubic.Out)
+                    .start();
+            }
+
+            // Reset the experiment
+            function resetExperiment() {
+                experimentStarted = false;
+                heatProgress = 0;
+
+                // Hide flame
+                flame.visible = false;
+                if (flame.heatWave) flame.heatWave.visible = false;
+
+                // Smoothly animate metal strip color and glow reset
+                if (metalStrip.material && metalStrip.material.color) {
+                    new TWEEN.Tween(metalStrip.material.color)
+                        .to({ r: 0.72, g: 0.45, b: 0.2 }, 600)
+                        .start();
+                    if (metalStrip.material.emissive) {
+                        new TWEEN.Tween(metalStrip.material.emissive)
+                            .to({ r: 0, g: 0, b: 0 }, 600)
+                            .start();
+                        metalStrip.material.emissiveIntensity = 0;
+                    }
+                }
+
+                // Remove old pin, pinHead, and wax from scene if they exist
+                if (pin && pin.parent) {
+                    pin.parent.remove(pin);
+                }
+                if (pinHead && pinHead.parent) {
+                    pinHead.parent.remove(pinHead);
+                }
+                if (wax && wax.parent) {
+                    wax.parent.remove(wax);
+                }
+
+                // Stop any active tweens
+                if (heatTween) heatTween.stop();
+                if (fallTween) fallTween.stop();
+                TWEEN.removeAll();
+
+                // Recreate pin, pinHead, and wax in their original state
+                createPinAndWax(metalStrip.material.envMap);
+
+                // Reset observation text
+                document.getElementById("observation-text").textContent =
+                    "The pin will fall when heat conducts to the wax attachment point.";
+            }
+
+            // Animate flame and heat effects
+            function animateFlame() {
+                if (!experimentStarted) return;
+
+                // Oscillate flame height and color
+                const time = clock.getElapsedTime();
+                const height = 0.6 + Math.sin(time * 5) * 0.13;
+                const colorIntensity = 0.7 + Math.sin(time * 4) * 0.25;
+
+                flame.scale.y = height;
+                flame.material.color.setRGB(
+                    1,
+                    0.5 + colorIntensity * 0.3,
+                    colorIntensity * 0.25,
+                );
+                if (flame.glow) {
+                    flame.glow.material.opacity =
+                        0.35 + Math.abs(Math.sin(time * 3)) * 0.25;
+                }
+
+                // Animate heat wave mesh above the strip
+                if (flame.heatWave) {
+                    flame.heatWave.visible = true;
+                    // Animate vertices for wavy effect
+                    const pos = flame.heatWave.geometry.attributes.position;
+                    for (let i = 0; i < pos.count; i++) {
+                        const x = pos.getX(i);
+                        const y = pos.getY(i);
+                        pos.setZ(
+                            i,
+                            Math.sin(time * 2 + x * 3 + y * 5) *
+                                0.04 *
+                                (1 - Math.abs(y)),
+                        );
+                    }
+                    pos.needsUpdate = true;
+                    flame.heatWave.material.opacity =
+                        0.18 + 0.12 * Math.abs(Math.sin(time * 2));
+                }
+
+                // Animate heat glow on the metal strip
+                if (typeof metalStrip !== "undefined" && metalStrip.material) {
+                    if (!metalStrip.material._originalEmissive) {
+                        metalStrip.material._originalEmissive = metalStrip
+                            .material.emissive
+                            ? metalStrip.material.emissive.clone()
+                            : new THREE.Color(0x000000);
+                    }
+                    if (!metalStrip.material.emissive) {
+                        metalStrip.material.emissive = new THREE.Color(
+                            0x000000,
+                        );
+                    }
+                    // Glow based on heatProgress
+                    const glowStrength = Math.max(0, Math.min(1, heatProgress));
+                    metalStrip.material.emissive.setRGB(
+                        0.8 * glowStrength,
+                        0.35 * glowStrength,
+                        0,
+                    );
+                    metalStrip.material.emissiveIntensity = 0.7 * glowStrength;
+                }
+
+                requestAnimationFrame(animateFlame);
+            }
+
+            // Handle window resize
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                TWEEN.update();
+                if (window.controls) {
+                    controls.update();
+                }
+                renderer.render(scene, camera);
+
+                // Hover/tooltip logic
+                if (raycaster && camera && scene && tooltipDiv) {
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(
+                        [metalStrip, pin, wax, burner].filter(Boolean),
+                        false,
+                    );
+                    if (intersects.length > 0) {
+                        const obj = intersects[0].object;
+                        if (hoveredObject !== obj) {
+                            if (hoveredObject) unhighlightObject(hoveredObject);
+                            hoveredObject = obj;
+                            highlightObject(obj);
+                            showTooltip(
+                                obj.userData.tooltip,
+                                intersects[0].point,
+                            );
+                        }
+                    } else {
+                        if (hoveredObject) unhighlightObject(hoveredObject);
+                        hoveredObject = null;
+                        hideTooltip();
+                    }
+                }
+            }
+
+            function onCanvasMouseMove(event) {
+                // Get mouse position in normalized device coordinates
+                const rect = container.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            }
+
+            function highlightObject(obj) {
+                if (!obj || !obj.material) return;
+                if (!obj.material._origEmissive) {
+                    obj.material._origEmissive = obj.material.emissive
+                        ? obj.material.emissive.clone()
+                        : new THREE.Color(0x000000);
+                }
+                if (!obj.material.emissive)
+                    obj.material.emissive = new THREE.Color(0x000000);
+                obj.material.emissive.setRGB(0.9, 0.7, 0.1);
+                obj.material.emissiveIntensity = 0.7;
+            }
+
+            function unhighlightObject(obj) {
+                if (!obj || !obj.material) return;
+                if (obj.material._origEmissive) {
+                    obj.material.emissive.copy(obj.material._origEmissive);
+                } else {
+                    obj.material.emissive.setRGB(0, 0, 0);
+                }
+                obj.material.emissiveIntensity = 0;
+            }
+
+            function showTooltip(text, worldPos) {
+                if (!tooltipDiv) return;
+                tooltipDiv.textContent = text;
+                tooltipDiv.classList.add("visible");
+                // Project world position to 2D screen
+                const vector = worldPos.clone().project(camera);
+                const x = ((vector.x + 1) / 2) * container.offsetWidth;
+                const y = (-(vector.y - 1) / 2) * container.offsetHeight;
+                tooltipDiv.style.left = `${x + 12}px`;
+                tooltipDiv.style.top = `${y - 18}px`;
+            }
+
+            function hideTooltip() {
+                if (tooltipDiv) tooltipDiv.classList.remove("visible");
+            }
+
+            // Initialize the simulation
+            window.onload = init;
+        </script>
+    </body>
+</html>

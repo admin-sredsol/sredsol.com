@@ -1,1 +1,143 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap");
+
+:root {
+  --sl-color-accent-high: hsl(258, 79%, 72%);
+  --sl-color-accent: hsl(258, 61%, 66%);
+  --sl-color-accent-low: hsl(258, 55%, 57%);
+  --sl-hero-color: hsla(258, 61%, 66%, 30%);
+}
+
+/*:root[data-theme="light"] {
+  --sl-color-accent-high: hsl(257, 49%, 42%);
+  --sl-color-accent: hsl(257, 54%, 59%);
+  --sl-color-accent-low: hsl(257, 52%, 75%);
+  --sl-hero-color: hsla(257, 70%, 70%, 25%);
+  --sl-text-color: #fff;
+}*/
+
+:root[data-theme="light"] {
+  /* Graph Container Colors */
+  --slsg-graph-minimized-bg-color: #ffffff;
+  --slsg-graph-maximized-bg-color: #edeef3;
+  --slsg-graph-outline-color: #e2e3e8;
+
+  --slsg-graph-action-color: #17181c;
+  --slsg-graph-action-color-hover: #17181c;
+  --slsg-graph-action-bg-color-hover: #c1c3c8;
+
+  --slsg-context-menu-border-color: #888c96;
+  --slsg-context-menu-bg-color: #edeef3;
+  --slsg-context-menu-bg-color-hover: #c1c3c8;
+
+  /* Text Colors */
+  --slsg-text-color: #17181c;
+  --slsg-text-color-accent: #2d8dc5;
+
+  /* Node colors */
+  --slsg-node-color: #888c96;
+  --slsg-node-color-hover: #2d8dc5;
+  --slsg-node-color-muted: #d3d3d3;
+  --slsg-node-color-adjacent: #888c96;
+
+  --slsg-node-color-current: #76bd6e;
+  --slsg-node-color-visited: #7fb7bd;
+  --slsg-node-color-unresolved: #ea7f7f;
+  --slsg-node-color-external: #c3a6ff;
+  --slsg-node-color-tag: #c777dc;
+
+  --slsg-node-color-1: #ff595e;
+  --slsg-node-color-2: #ff924c;
+  --slsg-node-color-3: #ffca3a;
+  --slsg-node-color-4: #c5ca30;
+  --slsg-node-color-5: #8ac926;
+  --slsg-node-color-6: #52a675;
+  --slsg-node-color-7: #1982c4;
+  --slsg-node-color-8: #4267ac;
+  --slsg-node-color-9: #7d5ba6;
+
+  /* Link colors */
+  --slsg-link-color: #888c96;
+  --slsg-link-color-hover: #2d8dc5;
+  --slsg-link-color-muted: #c1c3c8;
+}
+
+.hero {
+  padding: 0;
+}
+
+/* --- Enhanced Starlight Tabs --- */
+.sl-tabs {
+  background: var(--sl-color-accent-low, #f3f4f6);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5em;
+  padding-top: 0.5em;
+}
+
+.sl-tabs [role="tablist"] {
+  gap: 1em;
+  display: flex;
+}
+
+.sl-tabs [role="tab"] {
+  font-weight: 600;
+  padding: 0.75em 2em;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--sl-color-accent-high, #2563eb);
+  transition:
+    background 0.2s,
+    color 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.sl-tabs [role="tab"][aria-selected="true"] {
+  background: var(--sl-color-accent-high, #2563eb);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sl-tabs [role="tab"]:hover {
+  background: var(--sl-color-accent, #a5b4fc);
+  color: #fff;
+}
+
+.sl-tabs [role="tabpanel"] {
+  animation: fadeIn 0.3s;
+  padding: 1em 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* --- End Enhanced Starlight Tabs --- */
+
+/* Hero style */
+[data-has-hero] .page {
+  height: 100%;
+  background:
+    linear-gradient(215deg, var(--sl-hero-color), transparent 40%),
+    radial-gradient(var(--sl-hero-color), transparent 40%)
+      no-repeat -60vw -40vh / 150vw 200vh,
+    radial-gradient(var(--sl-hero-color), transparent 65%) no-repeat 50%
+      calc(100% + 20rem) / 150rem 30rem;
+}
+
+[data-has-hero] header {
+  border-bottom: 1px solid transparent;
+  background-color: transparent;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+[data-has-hero] .hero > img {
+  filter: drop-shadow(0 0 3rem var(--sl-hero-color));
+}
+
+@layer my-reset, starlight, obsidian, my-overrides;

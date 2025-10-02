@@ -1,0 +1,5 @@
+sredsol-website/public/icons/facebook.svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <rect width="32" height="32" rx="6" fill="#1877F3"/>
+  <path d="M22.675 16H18.5V26H14.5V16H12V12.5H14.5V10.75C14.5 8.678 15.678 7 18.25 7H21V10.5H19.25C18.836 10.5 18.5 10.836 18.5 11.25V12.5H21.25L20.75 16H18.5V26H22.675C23.406 26 24 25.406 24 24.675V17.325C24 16.594 23.406 16 22.675 16Z" fill="#fff"/>
+</svg>
