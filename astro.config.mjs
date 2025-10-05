@@ -4,8 +4,9 @@ import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
 import serviceWorker from "astrojs-service-worker";
-import starlightThemeRapide from "starlight-theme-rapide";
-import starlightThemeObsidian from "starlight-theme-obsidian";
+// import starlightThemeRapide from "starlight-theme-rapide";
+// import starlightThemeObsidian from "starlight-theme-obsidian";
+import starlightThemeFlexoki from "starlight-theme-flexoki";
 
 // const DEV_PORT = 2121;
 
@@ -37,7 +38,11 @@ export default defineConfig({
     //
     starlight({
       //plugins: [starlightThemeRapide()],
-      plugins: [starlightThemeObsidian()],
+      plugins: [
+        starlightThemeFlexoki({
+          accentColor: "magenta",
+        }),
+      ],
       logo: {
         src: "./src/assets/logo.svg",
       },
@@ -46,13 +51,14 @@ export default defineConfig({
       prerender: false,
       components: {
         Head: "./src/overrides/Head.astro",
+        // Sidebar: "./src/overrides/Sidebar.astro",
         // Pagination: "./src/overrides/Pagination.astro",
         // Sidebar: "./src/overrides/Sidebar.astro",
         // ThemeSelect: "./src/overrides/ThemeSelect.astro",
       },
       customCss: [
         // Relative path to your custom CSS file
-        "./src/styles/global.css",
+        // "./src/styles/global.css",
         "./src/styles/custom.css",
       ],
       head: [
@@ -74,14 +80,14 @@ export default defineConfig({
           label: "Start Here",
           items: [
             { label: "Introduction", slug: "docs/intro" },
-            { label: "Purchase", slug: "docs/procurement" },
-            { label: "Installation", slug: "docs/installation" },
+            { label: "Purchase", slug: "docs/purchase" },
+            { label: "Installation", slug: "docs/install" },
             { label: "Admin Dashboard", slug: "docs/admin-dash" },
             { label: "Teacher Dashboard", slug: "docs/teacher-dash" },
           ],
         },
         {
-          label: "AP State Board",
+          label: "Activities - AP State Board",
           collapsed: true,
           items: [
             { label: "6 math", slug: "apstate/6math" },

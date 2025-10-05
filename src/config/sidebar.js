@@ -1,0 +1,45 @@
+export default [
+  { label: "Home", link: "/docs" },
+  {
+    label: "Start Here",
+    items: [
+      { label: "Introduction", slug: "docs/intro" },
+      { label: "Purchase", slug: "docs/procurement" },
+      { label: "Installation", slug: "docs/installation" },
+      { label: "Admin Dashboard", slug: "docs/admin-dash" },
+      { label: "Teacher Dashboard", slug: "docs/teacher-dash" },
+    ],
+  },
+  {
+    label: "AP State Board",
+    collapsed: true,
+    items: [
+      { label: "6 math", slug: "apstate/6math" },
+      { label: "7 math", slug: "apstate/7math" },
+      { label: "8 math", slug: "apstate/8math" },
+      { label: "9 math", slug: "apstate/9math" },
+      { label: "10 math", slug: "apstate/10math" },
+      { label: "6 science", slug: "apstate/6sci" },
+      { label: "7 science", slug: "apstate/7sci" },
+      { label: "8 science", slug: "apstate/8sci" },
+      { label: "9 science", slug: "apstate/9sci" },
+      { label: "10 science", slug: "apstate/10sci" },
+    ],
+  },
+  {
+    label: "Example Activities",
+    collapsed: true,
+    items: [
+      { label: "6 math", slug: "examples/6math" },
+      { label: "6 science", slug: "examples/6sci" },
+      { label: "7 math", slug: "examples/7math" },
+      { label: "7 science", slug: "examples/7sci" },
+      { label: "8 math", slug: "examples/8math" },
+      { label: "8 science", slug: "examples/8sci" },
+      { label: "9 math", slug: "examples/9math" },
+      { label: "9 science", slug: "examples/9sci" },
+      { label: "10 math", slug: "examples/10math" },
+      { label: "10 science", slug: "examples/10sci" },
+    ],
+  },
+];
